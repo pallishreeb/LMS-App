@@ -3,7 +3,10 @@ import Login from '../../screens/beforeLogin/login/Login';
 import SignUp from '../../screens/beforeLogin/signUp/SignUp';
 import Otp from '../../screens/beforeLogin/otp/Otp';
 import ForgotPass from '../../screens/beforeLogin/forgotPass/forgotPass';
-import Home from '../../screens/afterLogin/Home/Home';
+import BottomTab from '../../helpers/BottomTab';
+import BookDetails from '../../screens/afterLogin/BookDetails/BookDetails';
+import Payment from '../../screens/afterLogin/Payment/Payment';
+import PdfViewer from '../../screens/afterLogin/PdfViewer/PdfViewer';
 
 const Stack = createStackNavigator();
 const BeforeLoginStack = route => {
@@ -14,6 +17,11 @@ const BeforeLoginStack = route => {
         headerStyle: {elevation: 0},
         cardStyle: {backgroundColor: '#fff'},
       }}>
+      <Stack.Screen
+        name="BottomTab"
+        component={BottomTab}
+        options={{headerShown: false}}
+      />
       <Stack.Screen
         name="Login"
         component={Login}
@@ -31,8 +39,18 @@ const BeforeLoginStack = route => {
         options={{headerShown: false}}
       />
       <Stack.Screen
-        name="Home"
-        component={Home}
+        name="BookDetails"
+        component={BookDetails}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Payment"
+        component={Payment}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="PdfViewer"
+        component={PdfViewer}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

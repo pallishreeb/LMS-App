@@ -51,7 +51,7 @@ const SignUp = ({navigation}) => {
     getAndroidId().then(androidId => {
       setAndroidDeviceId(androidId);
       // androidId here
-      console.log('🚀 ~ getAndroidId ~ androidId:', typeof androidId);
+      // console.log('🚀 ~ getAndroidId ~ androidId:', typeof androidId);
     });
   };
 
@@ -142,9 +142,9 @@ const SignUp = ({navigation}) => {
         password: confirmPassword,
         device_id: androidDeviceId,
       });
-      console.log(response.status, 'response.status');
+      // console.log(response.status, 'response.status');
       if (response.status === 200) {
-        console.log(response?.data);
+        // console.log(response?.data);
         setRes(response.data);
         Alert.alert('Info', `${response.data.message}`, [
           {

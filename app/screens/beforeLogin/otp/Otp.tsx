@@ -44,7 +44,7 @@ const Otp = ({navigation, route}) => {
             {
               text: 'Ok',
               onPress: () => {
-                navigation.navigate('Home');
+                navigation.navigate('BottomTab');
               },
               style: 'default',
             },

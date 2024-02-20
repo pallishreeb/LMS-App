@@ -5,7 +5,8 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {fp, wp} from '../../helpers/resDimension';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {fp, hp, wp} from '../../helpers/resDimension';
 import {color} from '../../constants/colors/colors';
 export const useIcon = {
   EyeOff: () => (
@@ -78,5 +79,41 @@ export const useIcon = {
       color={color.WHITE}
       style={{marginRight: wp(2)}}
     />
+  ),
+  BlankCheckbox_black: () => (
+    <MaterialCommunityIcons
+      name="checkbox-blank-outline"
+      size={fp(2.5)}
+      color={'black'}
+      style={{marginRight: wp(2)}}
+    />
+  ),
+  FilledCheckbox_black: () => (
+    <MaterialCommunityIcons
+      name="checkbox-marked"
+      size={fp(2.5)}
+      color={'black'}
+      style={{marginRight: wp(2)}}
+    />
+  ),
+  Menu: () => (
+    <Ionicons
+      name="menu-outline"
+      size={fp(3.2)}
+      color={color.WHITE}
+      // style={{marginRight: wp(2)}}
+    />
+  ),
+  UserIcon: () => (
+    <FontAwesome6 name="circle-user" size={fp(3.2)} color={color.WHITE} />
+  ),
+  CloseIcon: () => (
+    <AntDesign name="closecircleo" size={fp(3.2)} color={color.PRIMARY_BLUE} />
+  ),
+  RightArrowShort: () => (
+    <AntDesign name="right" size={fp(3.4)} color="black" />
+  ),
+  ArrowLeft: () => (
+    <AntDesign name="arrowleft" size={fp(3.2)} color={color.WHITE} />
   ),
 };

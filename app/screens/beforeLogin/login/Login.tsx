@@ -61,7 +61,7 @@ const Login = ({navigation}) => {
         },
         {
           text: 'Cancel',
-          onPress: () => console.log('pressed cancel'),
+          // onPress: () => console.log('pressed cancel'),
         },
       ],
     );
@@ -141,7 +141,7 @@ const Login = ({navigation}) => {
           Alert.alert('Information', `${response.data.message}`, [
             {
               text: 'Ok',
-              onPress: () => navigation.navigate('Home'),
+              onPress: () => navigation.navigate('BottomTab'),
               style: 'default',
             },
           ]);
