@@ -26,8 +26,12 @@ const DislikeIcon = require('./DislikeIcon.png');
 const DummyProfImg = require('./DummyProfImg.png');
 const SendComment = require('./SendComment.png');
 const CommentMenu = require('./CommentMenu.png');
+const CommentDeleteIcon = require('./CmtDelete.png');
+const CommentEditIcon = require('./CmtEdit.png');
 
 export {
+  CommentEditIcon,
+  CommentDeleteIcon,
   PlayIcon,
   CommentMenu,
   SendComment,

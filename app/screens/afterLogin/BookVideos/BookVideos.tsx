@@ -14,6 +14,7 @@ import {
   ToastAndroid,
   Alert,
   StatusBar,
+  Modal,
 } from 'react-native';
 import axios from 'axios';
 import Video, {OnProgressData} from 'react-native-video';
@@ -25,6 +26,8 @@ import {
   responsiveFontSize,
 } from 'react-native-responsive-dimensions';
 import {
+  CommentDeleteIcon,
+  CommentEditIcon,
   CommentMenu,
   DummyProfImg,
   LikeIcon,
@@ -62,12 +65,16 @@ const BookVideos: React.FC = ({route}) => {
   const [duration, setDuration] = useState(0);
   const [commentsData, setCommentsData] = useState([]);
   const [videoLoading, setVideoLoading] = useState(false);
+  const [showCommentMenu, setShowCommentMenu] = useState(false);
 
   const [bookVideosRes, setBookVideosRes] = useState([]);
   const [likeCount, setLikeCount] = useState();
 
   const [dislikeCount, setDislikeCount] = useState();
   const [commentCount, setCommentCount] = useState();
+  const [openCommentMenuIndex, setOpenCommentMenuIndex] = useState(null);
+  const [openCommentReplyMenuIndex, setOpenCommentReplyMenuIndex] =
+    useState(null);
 
   const playbackSpeedOptions = [
     {speed: 0.25, label: '0.25x'},
@@ -203,9 +210,19 @@ const BookVideos: React.FC = ({route}) => {
       setIsLoading(false);
     }
   };
-
-  function handleCommentMenu() {
-    console.log('handleCommentMenu');
+  function handleCommentMenu(commentId) {
+    console.log('🚀 ~ handleCommentMenu ~ commentId:', commentId);
+    console.log('handleCommentMenu working');
+    setOpenCommentMenuIndex(
+      commentId === openCommentMenuIndex ? null : commentId,
+    );
+  }
+  function handleCommentReplyMenu(commentId) {
+    console.log('🚀 ~ handleCommentMenu ~ commentId:', commentId);
+    console.log('handleCommentMenu working');
+    setOpenCommentReplyMenuIndex(
+      commentId === openCommentReplyMenuIndex ? null : commentId,
+    );
   }
 
   function handleCommentLike() {
@@ -362,7 +379,7 @@ const BookVideos: React.FC = ({route}) => {
     }
   }
 
-  function renderComments({item}) {
+  function renderCommentReply({item}) {
     return (
       <View
         style={{
@@ -401,14 +418,88 @@ const BookVideos: React.FC = ({route}) => {
                 {'    '}5 months ago
               </CustomText>
             </CustomText>
+            {openCommentReplyMenuIndex === item?.id && (
+              <View
+                style={{
+                  position: 'absolute',
+                  // height: hp(4),
+                  width: wp(25),
+                  backgroundColor: '#Ffffff',
+                  // marginLeft: wp(10),
+                  elevation: 2,
+                  borderRadius: fp(1),
+                  right: 10,
+                  top: 20,
+                  // padding: fp(1),
+                }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: 5,
+                  }}>
+                  <Image
+                    source={CommentEditIcon}
+                    style={{
+                      height: fp(1.4),
+                      width: fp(1.4),
+                      marginLeft: wp(2),
+                    }}
+                  />
+                  <CustomText
+                    type={'typeRegular'}
+                    style={{
+                      fontFamily: typography.Inter_Medium,
+                      fontSize: fp(1.4),
+                      color: '#565555',
+                    }}>
+                    {'   '}Edit
+                  </CustomText>
+                </View>
+                <View
+                  style={{
+                    borderTopColor: '#F2F2F2',
+                    borderTopWidth: fp(0.2),
+                    width: '100%',
+                  }}
+                />
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: 5,
+                  }}>
+                  <Image
+                    source={CommentDeleteIcon}
+                    style={{
+                      height: fp(1.4),
+                      width: fp(1.4),
+                      marginLeft: wp(2),
+                    }}
+                    resizeMode="contain"
+                  />
+                  <CustomText
+                    type={'typeRegular'}
+                    style={{
+                      fontFamily: typography.Inter_Medium,
+                      fontSize: fp(1.4),
+                      color: '#565555',
+                    }}>
+                    {'   '}Delete
+                  </CustomText>
+                </View>
+              </View>
+            )}
             <Pressable
               style={{height: fp(2), width: fp(2)}}
-              onPress={handleCommentMenu}>
+              onPress={() => {
+                handleCommentReplyMenu(item?.id);
+              }}>
               <Image
                 source={CommentMenu}
                 style={{
-                  height: fp(1.4),
-                  width: fp(1.4),
+                  height: fp(2),
+                  width: fp(2),
                   marginTop: hp(0.2),
                   alignSelf: 'flex-end',
                 }}
@@ -422,7 +513,7 @@ const BookVideos: React.FC = ({route}) => {
               fontFamily: typography.Inter_Regular,
               fontSize: fp(1.4),
               color: '#565555',
-              width: wp(80),
+              width: wp(65),
               marginTop: hp(0.6),
               textAlign: 'justify',
               lineHeight: 15,
@@ -430,48 +521,6 @@ const BookVideos: React.FC = ({route}) => {
             {item?.content}
           </CustomText>
           <View style={{marginTop: hp(1), flexDirection: 'row'}}>
-            <Pressable onPress={handleCommentLike}>
-              <CustomText
-                type={'typeRegular'}
-                style={{
-                  fontFamily: typography.Inter_Medium,
-                  fontSize: fp(1.4),
-                  color: '#9E9E9E',
-                }}>
-                Like
-              </CustomText>
-            </Pressable>
-            <CustomText
-              type={'typeRegular'}
-              style={{
-                fontFamily: typography.Inter_Bold,
-                fontSize: fp(1.4),
-                color: '#9E9E9E',
-                marginHorizontal: wp(2),
-              }}>
-              |
-            </CustomText>
-            <Pressable onPress={handleCommentDislike}>
-              <CustomText
-                type={'typeRegular'}
-                style={{
-                  fontFamily: typography.Inter_Medium,
-                  fontSize: fp(1.4),
-                  color: '#9E9E9E',
-                }}>
-                Dislike
-              </CustomText>
-            </Pressable>
-            <CustomText
-              type={'typeRegular'}
-              style={{
-                fontFamily: typography.Inter_Bold,
-                fontSize: fp(1.4),
-                color: '#9E9E9E',
-                marginHorizontal: wp(2),
-              }}>
-              |
-            </CustomText>
             <Pressable onPress={handleCommentReply}>
               <CustomText
                 type={'typeRegular'}
@@ -486,6 +535,178 @@ const BookVideos: React.FC = ({route}) => {
           </View>
         </View>
       </View>
+    );
+  }
+
+  function renderComments({item}) {
+    // console.log('🚀 ~ renderComments ~ item:', item);
+    return (
+      <>
+        <View
+          style={{
+            borderTopWidth: fp(0.5),
+            borderColor: '#F7F7F7',
+            marginTop: hp(2),
+          }}
+        />
+        <View
+          style={{
+            marginHorizontal: wp(2),
+            flexDirection: 'row',
+            width: wp(20),
+          }}>
+          <Image
+            source={DummyProfImg}
+            style={{height: fp(6), width: fp(6), marginTop: hp(2)}}
+            resizeMode="contain"
+          />
+          <View style={{marginLeft: wp(1.6), marginTop: hp(2)}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: fp(1.4),
+                justifyContent: 'space-between',
+              }}>
+              <CustomText
+                type={'typeRegular'}
+                style={{
+                  fontFamily: typography.Inter_Bold,
+                  fontSize: fp(1.5),
+                  color: '#565555',
+                }}>
+                SohibMirza
+                <CustomText
+                  type={'typeRegular'}
+                  style={{
+                    fontFamily: typography.Inter_Medium,
+                    fontSize: fp(1.4),
+                    color: '#9E9E9E',
+                  }}>
+                  {'    '}5 months ago
+                </CustomText>
+              </CustomText>
+              {openCommentMenuIndex === item?.id && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    // height: hp(4),
+                    width: wp(25),
+                    backgroundColor: '#Ffffff',
+                    // marginLeft: wp(10),
+                    elevation: 2,
+                    borderRadius: fp(1),
+                    right: 10,
+                    top: 20,
+                    // padding: fp(1),
+                  }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      padding: 5,
+                    }}>
+                    <Image
+                      source={CommentEditIcon}
+                      style={{
+                        height: fp(1.4),
+                        width: fp(1.4),
+                        marginLeft: wp(2),
+                      }}
+                    />
+                    <CustomText
+                      type={'typeRegular'}
+                      style={{
+                        fontFamily: typography.Inter_Medium,
+                        fontSize: fp(1.4),
+                        color: '#565555',
+                      }}>
+                      {'   '}Edit
+                    </CustomText>
+                  </View>
+                  <View
+                    style={{
+                      borderTopColor: '#F2F2F2',
+                      borderTopWidth: fp(0.2),
+                      width: '100%',
+                    }}
+                  />
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      padding: 5,
+                    }}>
+                    <Image
+                      source={CommentDeleteIcon}
+                      style={{
+                        height: fp(1.4),
+                        width: fp(1.4),
+                        marginLeft: wp(2),
+                      }}
+                      resizeMode="contain"
+                    />
+                    <CustomText
+                      type={'typeRegular'}
+                      style={{
+                        fontFamily: typography.Inter_Medium,
+                        fontSize: fp(1.4),
+                        color: '#565555',
+                      }}>
+                      {'   '}Delete
+                    </CustomText>
+                  </View>
+                </View>
+              )}
+              <Pressable
+                style={{height: fp(2), width: fp(2)}}
+                onPress={() => {
+                  handleCommentMenu(item?.id);
+                }}>
+                <Image
+                  source={CommentMenu}
+                  style={{
+                    height: fp(2),
+                    width: fp(2),
+                    marginTop: hp(0.2),
+                    alignSelf: 'flex-end',
+                  }}
+                  resizeMode="contain"
+                />
+              </Pressable>
+            </View>
+
+            <CustomText
+              type={'typeRegular'}
+              style={{
+                fontFamily: typography.Inter_Regular,
+                fontSize: fp(1.4),
+                color: '#565555',
+                width: wp(80),
+                marginTop: hp(0.6),
+                textAlign: 'justify',
+                lineHeight: 15,
+              }}>
+              {item?.content}
+            </CustomText>
+
+            <Pressable onPress={handleCommentReply} style={{marginTop: hp(1)}}>
+              <CustomText
+                type={'typeRegular'}
+                style={{
+                  fontFamily: typography.Inter_Medium,
+                  fontSize: fp(1.4),
+                  color: '#9E9E9E',
+                }}>
+                Reply
+              </CustomText>
+            </Pressable>
+            <View style={{marginTop: hp(1.4)}}>
+              <FlatList data={item.replies} renderItem={renderCommentReply} />
+            </View>
+          </View>
+        </View>
+      </>
     );
   }
 
@@ -789,13 +1010,6 @@ const BookVideos: React.FC = ({route}) => {
             </View>
           </View>
           {/* //?comment section */}
-          <View
-            style={{
-              borderTopWidth: fp(0.5),
-              borderColor: '#F7F7F7',
-              marginTop: hp(2),
-            }}
-          />
           <View style={{flex: 1, marginBottom: hp(2)}}>
             <FlatList data={commentsData} renderItem={renderComments} />
           </View>
