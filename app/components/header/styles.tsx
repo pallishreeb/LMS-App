@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
   wrapper: {
     height: Platform.OS === 'ios' ? hp(12) : hp(7),
     width: wp(100),
-    flex: 1,
+    // flex: 1,
     // position: 'absolute',
   },
   innerWrapper: {

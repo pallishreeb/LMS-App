@@ -10,7 +10,7 @@ const PdfViewer = ({navigation, route}) => {
   //   cache: true,
   // };
   const source = {
-    uri: `http://15.206.125.16/pdf_books/${BookDetails.pdf_book}`,
+    uri: `${BookDetails.pdf_book}`,
     // uri: `http://15.206.125.16/pdf_books/1708345315.pdf`,
     cache: true,
   };

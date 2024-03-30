@@ -28,6 +28,7 @@ import {regex} from '../../../constants/regex';
 import ErrorMsg from '../../../components/errorMsg/ErrorMsg';
 import {useIcon} from '../../../assets/icons/useIcon';
 import {loadString, saveString} from '../../../storage/storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -76,8 +77,7 @@ const Login = ({navigation}) => {
       setAndroidDeviceId(androidId);
     });
   };
-  console.log('🚀 ~ Login ~ checkboxState:', checkboxState);
-  console.log('react native');
+
   const handleEmail = (text: React.SetStateAction<string>) => {
     const trimmedText = text.trim().replace(/\s/g, '');
     setEmail(trimmedText);
@@ -137,6 +137,7 @@ const Login = ({navigation}) => {
       if (response.status === 200) {
         console.log(response?.data);
         setRes(response.data);
+        await AsyncStorage.setItem('token', response?.data?.token);
         if (response.data.data.otp == null) {
           Alert.alert('Information', `${response.data.message}`, [
             {

@@ -20,6 +20,7 @@ import Home from '../screens/afterLogin/Home/Home';
 import Courses from '../screens/afterLogin/Courses/Courses';
 import Profile from '../screens/afterLogin/Profile/Profile';
 import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
+import VideoPlayer from '../screens/afterLogin/BookVideos/VideoPlayerExample';
 
 const Tab = createBottomTabNavigator();
 const BottomTab = () => {
@@ -108,7 +109,9 @@ const BottomTab = () => {
       />
       <Tab.Screen
         name="Profile"
-        component={Profile}
+        // component={Profile}
+
+        component={VideoPlayer}
         options={{
           headerShown: false,
         }}

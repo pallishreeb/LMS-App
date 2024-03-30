@@ -110,7 +110,7 @@ const Home = ({navigation}) => {
           }}>
           <Image
             source={{
-              uri: `http://15.206.125.16/book_covers/${item.cover_pic}`,
+              uri: `${item.cover_pic}`,
             }}
             style={{
               height: hp(22),
@@ -217,7 +217,8 @@ const Home = ({navigation}) => {
 
             <Pressable
               onPress={() => {
-                navigation.navigate('Books');
+                // navigation.navigate('Books');
+                navigation.navigate('BookVideos');
               }}>
               <Text
                 style={{

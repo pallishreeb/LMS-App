@@ -36,7 +36,7 @@ const BookDetails = ({navigation, route}) => {
           <View style={{position: 'absolute', zIndex: 2000}}>
             <Image
               source={{
-                uri: `http://15.206.125.16/book_covers/${BookDetails.cover_pic}`,
+                uri: `${BookDetails.cover_pic}`,
               }}
               style={{
                 height: hp(22),

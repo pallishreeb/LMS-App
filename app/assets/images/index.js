@@ -15,8 +15,30 @@ const CourseCoverImg = require('./CourseCoverImg.png');
 const SoftEnggBookImg = require('./SoftEnggBookImg.png');
 const PaymentAlertIllus = require('./PaymentAlertIllus.png');
 const OrderAlertIllus = require('./OrderAlertIllus.png');
+const PrevIcon = require('./prev.png');
+const NextIcon = require('./next.png');
+const OrientationIcon = require('./orientation.png');
+const PauseIcon = require('./pause.png');
+const PlayIcon = require('./play.png');
+const LikeIcon = require('./LikeIcon.png');
+const CommentIcon = require('./CommentIcon.png');
+const DislikeIcon = require('./DislikeIcon.png');
+const DummyProfImg = require('./DummyProfImg.png');
+const SendComment = require('./SendComment.png');
+const CommentMenu = require('./CommentMenu.png');
 
 export {
+  PlayIcon,
+  CommentMenu,
+  SendComment,
+  DummyProfImg,
+  DislikeIcon,
+  CommentIcon,
+  LikeIcon,
+  PauseIcon,
+  PrevIcon,
+  NextIcon,
+  OrientationIcon,
   login_illustration,
   otp_illustration,
   headerBg,

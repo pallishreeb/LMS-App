@@ -1,6 +1,4 @@
 import {
-  Alert,
-  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -15,7 +13,6 @@ import {fp, hp, wp} from '../../../helpers/resDimension';
 import CRadioButton from '../../../components/radio/RadioButton';
 import {typography} from '../../../assets/fonts/typography';
 import {useIcon} from '../../../assets/icons/useIcon';
-import CustomText from '../../../components/text/CustomText';
 import ButtonComp from '../../../components/button/Button';
 import CustomAlert from '../../../components/alerts/CustomAlert';
 import {OrderAlertIllus} from '../../../assets/images';
@@ -176,11 +173,12 @@ const Payment = ({navigation, route}) => {
         <CustomAlert
           title="Thank you for orderding"
           subTitle="when an unknown printer took 
-a galley of type and scrambled."
+                    a galley of type and scrambled."
           img={OrderAlertIllus}
           onPress={() => {
             setShowOrderAlert(false);
-            navigation.navigate('PdfViewer', {BookDetails: BookDetails});
+            // navigation.navigate('PdfViewer', {BookDetails: BookDetails});
+            navigation.navigate('BookVideos', {BookDetails: BookDetails});
           }}
           onClosePress={() => {
             setShowOrderAlert(false);

@@ -60,7 +60,7 @@ const Books = ({navigation}) => {
             marginRight: wp(3),
           }}>
           <Image
-            source={{uri: `http://15.206.125.16/book_covers/${item.cover_pic}`}}
+            source={{uri: `${item.cover_pic}`}}
             style={{
               height: hp(22),
               width: wp(38),

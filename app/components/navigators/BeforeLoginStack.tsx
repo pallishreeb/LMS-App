@@ -7,6 +7,9 @@ import BottomTab from '../../helpers/BottomTab';
 import BookDetails from '../../screens/afterLogin/BookDetails/BookDetails';
 import Payment from '../../screens/afterLogin/Payment/Payment';
 import PdfViewer from '../../screens/afterLogin/PdfViewer/PdfViewer';
+import BookVideos from '../../screens/afterLogin/BookVideos/BookVideos';
+import VideoPlayerExample from '../../screens/afterLogin/BookVideos/VideoPlayerExample';
+import VideoPlayer from '../../screens/afterLogin/BookVideos/VideoPlayerExample';
 
 const Stack = createStackNavigator();
 const BeforeLoginStack = route => {
@@ -51,6 +54,16 @@ const BeforeLoginStack = route => {
       <Stack.Screen
         name="PdfViewer"
         component={PdfViewer}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="BookVideos"
+        component={BookVideos}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="VideoPlayer"
+        component={VideoPlayer}
         options={{headerShown: false}}
       />
     </Stack.Navigator>
