@@ -1,7 +1,12 @@
-import React from 'react';
-import {StyleSheet, Dimensions, View, Linking} from 'react-native';
+import React, {useState} from 'react';
+import {
+  StyleSheet,
+  Dimensions,
+  View,
+  Linking,
+  ActivityIndicator,
+} from 'react-native';
 import Pdf from 'react-native-pdf';
-import {BASE_URL} from '../../../constants/storageKeys';
 
 const PdfViewer = ({navigation, route}) => {
   const {BookDetails} = route.params;
@@ -9,10 +14,16 @@ const PdfViewer = ({navigation, route}) => {
   //   uri: `${BASE_URL}pdf-url/${2}`,
   //   cache: true,
   // };
+  const [loadingPercent, setLoadingPercent] = useState(0);
   const source = {
     uri: `${BookDetails.pdf_book}`,
-    // uri: `http://15.206.125.16/pdf_books/1708345315.pdf`,
     cache: true,
+  };
+
+  const handlePdfLoading = e => {
+    setLoadingPercent(e);
+    console.log('🚀 ~ handlePdfLoading ~ e:', e);
+    console.log('🚀 ~ handlePdfLoading ~ e:', typeof e);
   };
 
   return (
@@ -30,10 +41,13 @@ const PdfViewer = ({navigation, route}) => {
           console.log(error);
         }}
         onPressLink={uri => {
-          Linking.openURL(`${uri}`);
+          // Linking.openURL(`${uri}`);
+          navigation.navigate('BookVideos', {BookDetails: uri});
+          // navigation.navigate('BookVideos', {BookDetails: uri});
           console.log(`Link pressed: ${uri}`);
         }}
         style={styles.pdf}
+        onLoadProgress={e => handlePdfLoading(e)}
       />
     </View>
   );

@@ -5,4 +5,9 @@
         <!-- Customize your theme here. -->
         </style>
 
+<!--    <style name="CustomTheme" parent="Theme.AppCompat.Light.NoActionBar">-->
+<!--        <item name="android:windowIsFloating">true</item>-->
+<!--        <item name="android:windowFixedWidthMajor">200dp</item>-->
+<!--        <item name="android:windowFixedHeightMinor">300dp</item>-->
+<!--    </style>-->
 </resources>

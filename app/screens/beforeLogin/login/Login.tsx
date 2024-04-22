@@ -138,6 +138,10 @@ const Login = ({navigation}) => {
         console.log(response?.data);
         setRes(response.data);
         await AsyncStorage.setItem('token', response?.data?.token);
+        await AsyncStorage.setItem(
+          'user_id',
+          response?.data?.data?.id.toString(),
+        );
         if (response.data.data.otp == null) {
           Alert.alert('Information', `${response.data.message}`, [
             {

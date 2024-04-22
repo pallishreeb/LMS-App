@@ -13,7 +13,7 @@ import Header from '../../../components/header/Header';
 import CustomText from '../../../components/text/CustomText';
 import {color} from '../../../constants/colors/colors';
 import {fp, hp, wp} from '../../../helpers/resDimension';
-import {PaymentAlertIllus, SoftEnggBookImg} from '../../../assets/images';
+import {PaymentAlertIllus} from '../../../assets/images';
 import {useState} from 'react';
 import MainButton from '../../../components/button/MainButton';
 import ButtonComp from '../../../components/button/Button';

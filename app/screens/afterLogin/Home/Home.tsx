@@ -11,24 +11,18 @@ import {
 import React, {useEffect, useState} from 'react';
 import CustomText from '../../../components/text/CustomText';
 import {color} from '../../../constants/colors/colors';
-import Card from '../../../components/bookCard/BookCard';
 import {fp, hp, wp} from '../../../helpers/resDimension';
 import Header from '../../../components/header/Header';
-import {
-  BookCoverImg,
-  CourseCoverImg,
-  dummyRecommend,
-  headerBg,
-} from '../../../assets/images';
+import {dummyRecommend, headerBg} from '../../../assets/images';
 import SearchTextInput from '../../../components/searchTextInput/SearchTextInput';
 import RecommendedList from '../../../components/recommededList/RecommendedList';
-import BookCard from '../../../components/bookCard/BookCard';
 import {typography} from '../../../assets/fonts/typography';
 import CourseCard from '../../../components/courseCard/CourseCard';
 import {apiClient} from '../../../helpers/apiClient';
 import {endpoints} from '../../../constants/colors/endpoints';
 import Snackbar from 'react-native-snackbar';
 import {FlatList} from 'react-native-gesture-handler';
+import {Slider} from '@miblanchard/react-native-slider';
 
 const Home = ({navigation}) => {
   const [searchText, setSearchText] = useState('');
@@ -65,6 +59,7 @@ const Home = ({navigation}) => {
       setIsLoading(false);
     }
   };
+  const [slider, setSlider] = useState(0.2);
   const handleGetCourses = async () => {
     try {
       setIsLoading(true);
@@ -218,13 +213,15 @@ const Home = ({navigation}) => {
             <Pressable
               onPress={() => {
                 // navigation.navigate('Books');
-                navigation.navigate('BookVideos');
+                navigation.navigate('VideoPlayerEx');
+                // navigation.navigate('BookVideos');
               }}>
               <Text
                 style={{
                   fontFamily: typography.Inter_SemiBold,
                   color: color.PRIMARY_BLUE,
                   textDecorationLine: 'underline',
+                  fontSize: fp(1.6),
                 }}>
                 See All
               </Text>

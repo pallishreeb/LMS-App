@@ -4,7 +4,8 @@ import {NavigationContainer} from '@react-navigation/native';
 import AfterLoginStack from './app/components/navigators/AfterLoginStack';
 import BeforeLoginStack from './app/components/navigators/BeforeLoginStack';
 import SplashScreen from 'react-native-splash-screen';
-
+import {Provider} from 'react-redux';
+import {store} from './app/redux/Store';
 export default function App() {
   useEffect(() => {
     setTimeout(() => {
@@ -13,8 +14,10 @@ export default function App() {
   }, []);
 
   return (
-    <NavigationContainer>
-      <BeforeLoginStack />
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        <BeforeLoginStack />
+      </NavigationContainer>
+    </Provider>
   );
 }

@@ -8,8 +8,7 @@ import BookDetails from '../../screens/afterLogin/BookDetails/BookDetails';
 import Payment from '../../screens/afterLogin/Payment/Payment';
 import PdfViewer from '../../screens/afterLogin/PdfViewer/PdfViewer';
 import BookVideos from '../../screens/afterLogin/BookVideos/BookVideos';
-import VideoPlayerExample from '../../screens/afterLogin/BookVideos/VideoPlayerExample';
-import VideoPlayer from '../../screens/afterLogin/BookVideos/VideoPlayerExample';
+import VideoPlayerEx from '../VideoPlayer/VideoPlayer';
 
 const Stack = createStackNavigator();
 const BeforeLoginStack = route => {
@@ -62,10 +61,15 @@ const BeforeLoginStack = route => {
         options={{headerShown: false}}
       />
       <Stack.Screen
-        name="VideoPlayer"
-        component={VideoPlayer}
+        name="VideoPlayerEx"
+        component={VideoPlayerEx}
         options={{headerShown: false}}
       />
+      {/* <Stack.Screen
+        name="VideoScreen"
+        component={VideoScreen}
+        options={{headerShown: false}}
+      /> */}
     </Stack.Navigator>
   );
 };

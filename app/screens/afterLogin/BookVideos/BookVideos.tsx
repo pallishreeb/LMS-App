@@ -1,43 +1,21 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
   FlatList,
   ActivityIndicator,
   Image,
   TextInput,
   Pressable,
-  ScrollView,
   Platform,
   ToastAndroid,
   Alert,
   StatusBar,
-  Modal,
+  PermissionsAndroid,
 } from 'react-native';
 import axios from 'axios';
-import Video, {OnProgressData} from 'react-native-video';
-import Slider from '@react-native-community/slider';
-import Orientation from 'react-native-orientation-locker';
-import {
-  responsiveHeight,
-  responsiveWidth,
-  responsiveFontSize,
-} from 'react-native-responsive-dimensions';
-import {
-  CommentDeleteIcon,
-  CommentEditIcon,
-  CommentMenu,
-  DummyProfImg,
-  LikeIcon,
-  NextIcon,
-  OrientationIcon,
-  PauseIcon,
-  PlayIcon,
-  PrevIcon,
-  SendComment,
-} from '../../../assets/images';
+import {responsiveHeight} from 'react-native-responsive-dimensions';
+import {CommentMenu, DummyProfImg} from '../../../assets/images';
 import Header from '../../../components/header/Header';
 import {color} from '../../../constants/colors/colors';
 import CustomText from '../../../components/text/CustomText';
@@ -47,156 +25,90 @@ import LikeButton from '../../../components/LikeButton/LikeButton';
 import {apiClient} from '../../../helpers/apiClient';
 import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CommentInput from '../../../components/commentInput/CommentInput';
+import CommentReplyInput from '../../../components/commentInput/CommentReplyInput';
+import CommentMenuModal from '../../../components/CommentMenu/CommentMenuModal';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import CommentAlert from '../../../components/CommentAlert/CommentAlert';
+import VideoPlayerEx from '../../../components/VideoPlayer/VideoPlayer';
+import {BASE_URL} from '../../../constants/storageKeys';
+import {useDispatch} from 'react-redux';
+
+import {dislike, like} from '../../../redux/likeSlice';
+import DislikeButton from '../../../components/LikeButton/DislikeButton';
+import CommentButton from '../../../components/LikeButton/CommentButton';
 const BookVideos: React.FC = ({route}) => {
   const {BookDetails} = route.params;
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
-  const [showSettings, setShowSettings] = useState(false);
-  const videoRef = useRef<Video>(null);
-  const [isLandscape, setIsLandscape] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [slideTime, setSlideTime] = useState(0);
+  const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [isApiLoading, setIsApiLoading] = useState(false);
-  const [isVideoPlayerActive, setIsVideoPlayerActive] = useState(false);
   const [commentText, SetCommentText] = useState('');
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [commentsData, setCommentsData] = useState([]);
-  const [videoLoading, setVideoLoading] = useState(false);
-  const [showCommentMenu, setShowCommentMenu] = useState(false);
+  const [editCommentFlow, setEditCommentFlow] = useState(false);
+  const [editReplyFlow, setEditReplyFlow] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const [commentIdTobeEdit, setCommentIdTobeEdit] = useState();
+  const [replyIdTobeEdit, setReplyIdTobeEdit] = useState();
+  const [imageResponseUI, setImageResponseUI] = useState({});
 
   const [bookVideosRes, setBookVideosRes] = useState([]);
-  const [likeCount, setLikeCount] = useState();
-
-  const [dislikeCount, setDislikeCount] = useState();
-  const [commentCount, setCommentCount] = useState();
   const [openCommentMenuIndex, setOpenCommentMenuIndex] = useState(null);
   const [openCommentReplyMenuIndex, setOpenCommentReplyMenuIndex] =
     useState(null);
+  const [showCommentReplyInputIndex, setShowCommentReplyInputIndex] =
+    useState(null);
+  const [showAddPhotoModal, setShowAddPhotoModal] = useState(false);
+  const [showCommentAlert, setShowCommentAlert] = useState(false);
+  const [imageResponse, setImageResponse] = useState({});
+  const [likePressed, setLikePressed] = useState('');
+  const [disLikePressed, setDisLikePressed] = useState('');
+  const [isLandscape, setIsLandscape] = useState(false);
+  const refInput = useRef<TextInput>(null);
+  const refReplyInput = useRef<TextInput>(null);
 
-  const playbackSpeedOptions = [
-    {speed: 0.25, label: '0.25x'},
-    {speed: 0.5, label: '0.5x'},
-    {speed: 0.75, label: '0.75x'},
-    {speed: 1.0, label: 'Normal'},
-    {speed: 1.25, label: '1.25x'},
-    {speed: 1.5, label: '1.5x'},
-    {speed: 1.75, label: '1.75x'},
-    {speed: 2.0, label: '2x'},
-  ];
-
-  const playNextVideo = () => {
-    if (currentVideoIndex < bookVideosRes.length - 1) {
-      setCurrentVideoIndex(currentVideoIndex + 1);
-      setPaused(false);
-
-      setCommentCount(bookVideosRes[currentVideoIndex + 1].comments_count);
-      setLikeCount(bookVideosRes[currentVideoIndex + 1].likes_count);
-      setDislikeCount(bookVideosRes[currentVideoIndex + 1].dislikes_count);
-      handleGetCommentsData(bookVideosRes[currentVideoIndex + 1].id);
-    }
-  };
-
-  const onSeekComplete = (value: number) => {
-    if (videoRef.current) {
-      videoRef.current.seek(value);
-      setCurrentTime(value);
-      setPaused(false);
-    }
-  };
-
-  const playPreviousVideo = () => {
-    if (currentVideoIndex > 0) {
-      setCurrentVideoIndex(currentVideoIndex - 1);
-      setPaused(false);
-
-      setCommentCount(bookVideosRes[currentVideoIndex - 1].comments_count);
-      setLikeCount(bookVideosRes[currentVideoIndex - 1].likes_count);
-      setDislikeCount(bookVideosRes[currentVideoIndex - 1].dislikes_count);
-      handleGetCommentsData(bookVideosRes[currentVideoIndex - 1].id);
-    }
-  };
-
-  const togglePlayPause = () => {
-    setPaused(!paused);
-  };
-
-  const selectPlaybackSpeed = (speed: number) => {
-    setPlaybackSpeed(speed);
-    setShowSettings(false);
-  };
-
-  const toggleOrientation = () => {
-    if (isLandscape) {
-      Orientation.lockToPortrait();
-    } else {
-      Orientation.lockToLandscape();
-    }
-    setIsLandscape(!isLandscape);
-  };
-
-  const onProgress = (data: OnProgressData) => {
-    setCurrentTime(data.currentTime);
-    setDuration(data.seekableDuration);
-  };
-
-  const onSeek = (value: number) => {
-    if (videoRef.current) {
-      videoRef.current.seek(value);
-      setCurrentTime(value);
-    }
-  };
-
-  const formatTime = (timeInSeconds: number) => {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = Math.floor(timeInSeconds % 60);
-
-    return `${minutes < 10 ? '0' : ''}${minutes}:${
-      seconds < 10 ? '0' : ''
-    }${seconds}`;
-  };
-
-  const onLoadStart = () => {
-    setIsLoading(true);
-  };
-  function onReadyForDisplay() {
-    setVideoLoading(false);
-  }
-  function onVideoLoadStart() {
-    setVideoLoading(true);
-  }
-  const onLoad = data => {
-    setVideoLoading(false);
-    setDuration(data.duration);
-  };
-  const onError = err => {
-    toast(true, 'error: ' + JSON.stringify(err));
-  };
-
-  const onVideoBuffer = (param: OnBufferData) => {
-    console.log('onVideoBuffer');
-    setVideoLoading(param.isBuffering);
-  };
+  const [userId, setUserId] = useState('');
 
   useEffect(() => {
     handleGetBookVideos();
   }, []);
 
   const handleGetBookVideos = async () => {
-    console.log('handleGetBookVideos');
+    const user_id = await AsyncStorage.getItem('user_id');
+    setUserId(user_id);
     try {
       setIsLoading(true);
-      const response = await apiClient.get(`books/${BookDetails.id}/videos`);
-      console.log(response.status, 'response.status');
+      // const response = await apiClient.get(`books/${BookDetails.id}/videos`);
+      const response = await apiClient.post(`/videos/details`, {
+        video_url: BookDetails,
+      });
+
       if (response.status === 200) {
-        setBookVideosRes(response?.data);
+        setBookVideosRes(response?.data?.video);
+        console.log(response?.data?.video?.likes);
+        console.log(response?.data?.video?.dislikes);
+
+        const isLiked =
+          response?.data?.video?.likes.find(
+            item => item.id === Number(user_id),
+          ) !== undefined;
+        console.log('🚀 ~ handleGetBookVideos ~ isLiked:', isLiked);
+        const isDisliked =
+          response?.data?.video?.dislikes.find(
+            item => item.id === Number(user_id),
+          ) !== undefined;
+        console.log('🚀 ~ handleGetBookVideos ~ isDisliked:', isDisliked);
+        if (isLiked) {
+          dispatch(like(true));
+          dispatch(dislike(false));
+        } else if (isDisliked) {
+          dispatch(like(false));
+          dispatch(dislike(true));
+        } else {
+          dispatch(like(false));
+          dispatch(dislike(false));
+        }
+
         setIsLoading(false);
-        setCommentCount(response?.data[currentVideoIndex].comments_count);
-        setLikeCount(response?.data[currentVideoIndex].likes_count);
-        setDislikeCount(response?.data[currentVideoIndex].dislikes_count);
-        handleGetCommentsData(response?.data[currentVideoIndex].id);
+        handleGetCommentsData(response?.data?.video?.id);
       }
     } catch (error) {
       console.log('inside catch', error?.message);
@@ -211,37 +123,30 @@ const BookVideos: React.FC = ({route}) => {
     }
   };
   function handleCommentMenu(commentId) {
-    console.log('🚀 ~ handleCommentMenu ~ commentId:', commentId);
-    console.log('handleCommentMenu working');
     setOpenCommentMenuIndex(
       commentId === openCommentMenuIndex ? null : commentId,
     );
   }
   function handleCommentReplyMenu(commentId) {
-    console.log('🚀 ~ handleCommentMenu ~ commentId:', commentId);
-    console.log('handleCommentMenu working');
     setOpenCommentReplyMenuIndex(
       commentId === openCommentReplyMenuIndex ? null : commentId,
     );
   }
 
-  function handleCommentLike() {
-    console.log('handleCommentLike');
-  }
-  function handleCommentDislike() {
-    console.log('handleCommentDislike');
-  }
-  function handleCommentReply() {
-    console.log('handleCommentReply');
+  function handleCommentReply(commentId) {
+    // to be reply input box
+
+    setShowCommentReplyInputIndex(
+      commentId === showCommentReplyInputIndex ? null : commentId,
+    );
   }
 
   async function handleLikePress() {
     try {
       const token = await AsyncStorage.getItem('token');
-      console.log('🚀 ~ handleLikePress ~ token:', token);
       setIsLoading(true);
       const response = await axios.post(
-        `http://15.206.125.16/api/videos/${bookVideosRes[currentVideoIndex].id}/like`,
+        `http://43.204.161.117/api/videos/${bookVideosRes?.id}/like`,
         {},
         {
           headers: {
@@ -249,14 +154,20 @@ const BookVideos: React.FC = ({route}) => {
           },
         },
       );
-      console.log(response.status, 'response.status');
       if (response.status === 200) {
-        console.log(
-          '🚀 ~ handleGetBookVideos ~ response?.data:',
-          response?.data,
-        );
+        // setLikePressed(likePressed == 'like_pressed' ? '' : 'like_pressed');
+        // setLikePressed(
+        //   bookVideosRes?.likes.some(obj => Object.values(obj).includes(userId))
+        //     ? 'like_pressed'
+        //     : '',
+        // );
         handleGetBookVideos();
         setIsLoading(false);
+        Snackbar.show({
+          text: response.data.message,
+          duration: 2000,
+          backgroundColor: color.PRIMARY_BLUE,
+        });
       }
     } catch (error) {
       console.log('inside catch', error?.message);
@@ -269,14 +180,14 @@ const BookVideos: React.FC = ({route}) => {
       setIsLoading(false);
     }
   }
-  async function handleCommentPress() {}
+
   async function handleDislikePress() {
     try {
       const token = await AsyncStorage.getItem('token');
       console.log('🚀 ~ handleLikePress ~ token:', token);
       setIsLoading(true);
       const response = await axios.post(
-        `http://15.206.125.16/api/videos/${bookVideosRes[currentVideoIndex].id}/dislike`,
+        `${BASE_URL}videos/${bookVideosRes?.id}/dislike`,
         {},
         {
           headers: {
@@ -291,7 +202,13 @@ const BookVideos: React.FC = ({route}) => {
           response?.data,
         );
         handleGetBookVideos();
+        setLikePressed(''); //added to change the color of like when dislike pressed..
         setIsLoading(false);
+        Snackbar.show({
+          text: response.data.message,
+          duration: 2000,
+          backgroundColor: color.RED,
+        });
       }
     } catch (error) {
       console.log('inside catch', error?.message);
@@ -306,14 +223,141 @@ const BookVideos: React.FC = ({route}) => {
   }
 
   async function handleSendComment() {
+    console.log(
+      '🚀 ~ handleSendComment ~ handleSendComment: ',
+      bookVideosRes?.id,
+    );
+    console.log('🚀 ~ handleSendComment ~ commentText:', commentText);
+    console.log('🚀 ~ handleSendComment ~ commentText:', imageResponse);
+    refInput.current?.blur();
+    SetCommentText('');
+
+    const formData = new FormData();
+    if (commentText != '') {
+      formData.append('content', commentText);
+    } else {
+      Snackbar.show({
+        text: 'Please add text to comment',
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+    }
+    if (Object.keys(imageResponse).length != 0) {
+      formData.append('image', {
+        uri: imageResponse.uri,
+        name: imageResponse.fileName,
+        type: imageResponse.type,
+      });
+    }
+    console.log(formData, 'formData');
+    try {
+      const token = await AsyncStorage.getItem('token');
+      console.log('🚀 ~ handleSendComment ~ token:', token);
+      setIsLoading(true);
+      const response = await axios.post(
+        // `http://43.204.161.117/api/videos/${bookVideosRes?.id}/comments`,
+        `http://43.204.161.117/api/videos/${bookVideosRes?.id}/comments`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      console.log(response?.status);
+      if (response?.status === 201) {
+        handleGetCommentsData(bookVideosRes?.id);
+
+        setIsLoading(false);
+        SetCommentText('');
+        setImageResponse({});
+        setImageResponseUI({});
+        setShowCommentAlert(true);
+        setTimeout(() => {
+          setShowCommentAlert(false);
+        }, 3000);
+      }
+    } catch (error) {
+      console.log('🚀 ~ handleSendComment ~ error:', error);
+      Snackbar.show({
+        text: response?.data?.message,
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleSendEditedComment() {
+    refInput.current?.blur();
     SetCommentText('');
     const formData = new FormData();
-    formData.append('content', commentText);
+    if (commentText != '') {
+      formData.append('content', commentText);
+    } else {
+      Snackbar.show({
+        text: 'Please add text to comment',
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+    }
+    if (Object.keys(imageResponse).length != 0) {
+      formData.append('image', {
+        uri: imageResponse.uri,
+        name: imageResponse.fileName,
+        type: imageResponse.type,
+      });
+    }
     try {
       const token = await AsyncStorage.getItem('token');
       setIsLoading(true);
       const response = await axios.post(
-        `http://15.206.125.16/api/videos/${bookVideosRes[currentVideoIndex].id}/comments`,
+        `http://43.204.161.117/api/comments/${commentIdTobeEdit}`,
+        formData,
+
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      if (response.status === 200) {
+        handleGetCommentsData(bookVideosRes?.id);
+        setIsLoading(false);
+        SetCommentText('');
+        setImageResponse({});
+        setImageResponseUI({});
+        Snackbar.show({
+          text: response?.data?.message,
+          duration: 2000,
+          backgroundColor: color.PRIMARY_BLUE,
+        });
+      }
+    } catch (error) {
+      Snackbar.show({
+        text: response?.data?.message,
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+      // }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleSendCommentReply(commentId) {
+    console.log('🚀 ~ handleSendCommentReply ~ handleSendCommentReply:');
+    setReplyText('');
+    const formData = new FormData();
+    formData.append('content', replyText);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      setIsLoading(true);
+      const response = await axios.post(
+        `http://43.204.161.117/api/comments/${commentId}/replies`,
         formData,
         {
           headers: {
@@ -324,9 +368,48 @@ const BookVideos: React.FC = ({route}) => {
       );
       console.log(response.status, 'response.status');
       if (response.status === 201) {
-        handleGetCommentsData(bookVideosRes[currentVideoIndex].id);
+        handleCommentReply(commentId);
+        handleGetCommentsData(bookVideosRes?.id);
         setIsLoading(false);
-        SetCommentText('');
+        setReplyText('');
+      }
+    } catch (error) {
+      console.log('inside catch', error?.message);
+      Snackbar.show({
+        text: response?.data?.message,
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+      // }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleSendEditedReply(commentId) {
+    console.log('🚀 ~ handleSendEditedReply ~ handleSendEditedReply');
+    setReplyText('');
+    const formData = new FormData();
+    formData.append('content', replyText);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      setIsLoading(true);
+      const response = await axios.post(
+        `http://43.204.161.117/api/replies/${replyIdTobeEdit}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      console.log(response.status, 'response.status');
+      if (response.status === 200) {
+        handleCommentReply(commentId);
+        handleGetCommentsData(bookVideosRes.id);
+        setIsLoading(false);
+        setReplyText('');
       }
     } catch (error) {
       console.log('inside catch', error?.message);
@@ -344,13 +427,16 @@ const BookVideos: React.FC = ({route}) => {
   function onChangeComment(val) {
     SetCommentText(val);
   }
+  function onChangeCommentReply(val) {
+    setReplyText(val);
+  }
 
   async function handleGetCommentsData(id) {
     try {
       setIsLoading(true);
       const token = await AsyncStorage.getItem('token');
       const response = await axios.get(
-        `http://15.206.125.16/api/videos/${id}/comments-replies`,
+        `http://43.204.161.117/api/videos/${id}/comments-replies`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -359,15 +445,10 @@ const BookVideos: React.FC = ({route}) => {
       );
       console.log(response.status, 'response.status');
       if (response.status === 200) {
-        console.log(
-          '🚀 ~ handleGetCommentsData ~ response?.data:',
-          response?.data,
-        );
-        setCommentsData(response.data);
+        setCommentsData(response?.data);
         setIsLoading(false);
       }
     } catch (error) {
-      console.log('handleGetCommentsData', error?.message);
       Snackbar.show({
         text: response?.data?.message,
         duration: 2000,
@@ -379,11 +460,112 @@ const BookVideos: React.FC = ({route}) => {
     }
   }
 
+  async function handleCommentDelete(commentId) {
+    console.log('🚀 ~ handleCommentDelete ~ commentId:', commentId);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      setIsLoading(true);
+      const response = await axios.delete(
+        `http://43.204.161.117/api/comments/${commentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      console.log(response.status, 'response.status');
+      if (response.status === 200) {
+        handleGetCommentsData(bookVideosRes.id);
+        setIsLoading(false);
+        Snackbar.show({
+          text: response?.data?.message,
+          duration: 2000,
+          backgroundColor: color.PRIMARY_BLUE,
+        });
+      }
+    } catch (error) {
+      console.log('inside catch comment delete', error?.message);
+      Snackbar.show({
+        text: response?.data?.message,
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+      // }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleReplyDelete(commentId) {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      setIsLoading(true);
+      const response = await axios.delete(
+        `http://43.204.161.117/api/replies/${commentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      console.log(response.status, 'response.status');
+      if (response.status === 200) {
+        handleGetCommentsData(bookVideosRes.id);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.log('inside catch', error?.message);
+      Snackbar.show({
+        text: response?.data?.message,
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+      // }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+  function handleCommentEdit(item) {
+    refInput.current?.focus();
+    setEditCommentFlow(true);
+    handleCommentMenu(item?.id);
+    SetCommentText(item.content);
+    setImageResponseUI({uri: item?.image});
+    setCommentIdTobeEdit(item?.id);
+  }
+
+  function handleReplyEdit(item) {
+    setEditReplyFlow(true);
+    console.log('🚀 ~ handleReplyEdit ~ handleReplyEdit:');
+    refReplyInput.current?.focus();
+    handleCommentReply(item?.comment_id);
+
+    setReplyIdTobeEdit(item?.id);
+    handleCommentReplyMenu(item?.id);
+    setReplyText(item.content);
+  }
+
+  function handleAddAttachment() {
+    setShowAddPhotoModal(true);
+  }
+  function returnCommentCreatedTime(created_at) {
+    const currentDate = new Date();
+    const pastDate = new Date(created_at);
+    const differenceInMilliseconds = Math.abs(currentDate - pastDate);
+    const differenceInSeconds = differenceInMilliseconds / 1000;
+    const differenceInMinutes = differenceInSeconds / 60;
+    const differenceInHours = differenceInMinutes / 60;
+    const differenceInDays = differenceInHours / 24;
+    return Math.ceil(differenceInDays);
+  }
   function renderCommentReply({item}) {
+    const timeAgo = returnCommentCreatedTime(item?.created_at);
     return (
       <View
         style={{
           marginHorizontal: wp(2),
+          marginBottom: openCommentReplyMenuIndex == item?.id ? hp(5) : hp(1),
           flexDirection: 'row',
           width: wp(20),
         }}>
@@ -392,6 +574,7 @@ const BookVideos: React.FC = ({route}) => {
           style={{height: fp(6), width: fp(6), marginTop: hp(2)}}
           resizeMode="contain"
         />
+
         <View style={{marginLeft: wp(1.6), marginTop: hp(2)}}>
           <View
             style={{
@@ -415,80 +598,16 @@ const BookVideos: React.FC = ({route}) => {
                   fontSize: fp(1.4),
                   color: '#9E9E9E',
                 }}>
-                {'    '}5 months ago
+                {`  ${timeAgo} ${timeAgo == 1 ? 'day' : 'days'} ago`}
               </CustomText>
             </CustomText>
             {openCommentReplyMenuIndex === item?.id && (
-              <View
-                style={{
-                  position: 'absolute',
-                  // height: hp(4),
-                  width: wp(25),
-                  backgroundColor: '#Ffffff',
-                  // marginLeft: wp(10),
-                  elevation: 2,
-                  borderRadius: fp(1),
-                  right: 10,
-                  top: 20,
-                  // padding: fp(1),
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    padding: 5,
-                  }}>
-                  <Image
-                    source={CommentEditIcon}
-                    style={{
-                      height: fp(1.4),
-                      width: fp(1.4),
-                      marginLeft: wp(2),
-                    }}
-                  />
-                  <CustomText
-                    type={'typeRegular'}
-                    style={{
-                      fontFamily: typography.Inter_Medium,
-                      fontSize: fp(1.4),
-                      color: '#565555',
-                    }}>
-                    {'   '}Edit
-                  </CustomText>
-                </View>
-                <View
-                  style={{
-                    borderTopColor: '#F2F2F2',
-                    borderTopWidth: fp(0.2),
-                    width: '100%',
-                  }}
-                />
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    padding: 5,
-                  }}>
-                  <Image
-                    source={CommentDeleteIcon}
-                    style={{
-                      height: fp(1.4),
-                      width: fp(1.4),
-                      marginLeft: wp(2),
-                    }}
-                    resizeMode="contain"
-                  />
-                  <CustomText
-                    type={'typeRegular'}
-                    style={{
-                      fontFamily: typography.Inter_Medium,
-                      fontSize: fp(1.4),
-                      color: '#565555',
-                    }}>
-                    {'   '}Delete
-                  </CustomText>
-                </View>
-              </View>
+              <CommentMenuModal
+                handleCommentEdit={() => handleReplyEdit(item)}
+                handleCommentDelete={() => {
+                  handleReplyDelete(item?.id);
+                }}
+              />
             )}
             <Pressable
               style={{height: fp(2), width: fp(2)}}
@@ -502,6 +621,7 @@ const BookVideos: React.FC = ({route}) => {
                   width: fp(2),
                   marginTop: hp(0.2),
                   alignSelf: 'flex-end',
+                  marginRight: 20,
                 }}
                 resizeMode="contain"
               />
@@ -520,35 +640,24 @@ const BookVideos: React.FC = ({route}) => {
             }}>
             {item?.content}
           </CustomText>
-          <View style={{marginTop: hp(1), flexDirection: 'row'}}>
-            <Pressable onPress={handleCommentReply}>
-              <CustomText
-                type={'typeRegular'}
-                style={{
-                  fontFamily: typography.Inter_Medium,
-                  fontSize: fp(1.4),
-                  color: '#9E9E9E',
-                }}>
-                Reply
-              </CustomText>
-            </Pressable>
-          </View>
         </View>
       </View>
     );
   }
 
   function renderComments({item}) {
-    // console.log('🚀 ~ renderComments ~ item:', item);
+    const timeAgo = returnCommentCreatedTime(item?.created_at);
     return (
-      <>
-        <View
-          style={{
-            borderTopWidth: fp(0.5),
-            borderColor: '#F7F7F7',
-            marginTop: hp(2),
-          }}
-        />
+      <View
+        style={{
+          backgroundColor: 'white',
+          elevation: 1,
+          width: '95%',
+          alignSelf: 'center',
+          borderRadius: fp(1),
+          marginVertical: hp(1),
+          zIndex: -100,
+        }}>
         <View
           style={{
             marginHorizontal: wp(2),
@@ -583,98 +692,54 @@ const BookVideos: React.FC = ({route}) => {
                     fontSize: fp(1.4),
                     color: '#9E9E9E',
                   }}>
-                  {'    '}5 months ago
+                  {`  ${timeAgo} ${timeAgo == 1 ? 'day' : 'days'} ago`}
+                  {/* {'    '}5 months ago */}
                 </CustomText>
               </CustomText>
-              {openCommentMenuIndex === item?.id && (
-                <View
-                  style={{
-                    position: 'absolute',
-                    // height: hp(4),
-                    width: wp(25),
-                    backgroundColor: '#Ffffff',
-                    // marginLeft: wp(10),
-                    elevation: 2,
-                    borderRadius: fp(1),
-                    right: 10,
-                    top: 20,
-                    // padding: fp(1),
-                  }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      padding: 5,
-                    }}>
-                    <Image
-                      source={CommentEditIcon}
-                      style={{
-                        height: fp(1.4),
-                        width: fp(1.4),
-                        marginLeft: wp(2),
-                      }}
-                    />
-                    <CustomText
-                      type={'typeRegular'}
-                      style={{
-                        fontFamily: typography.Inter_Medium,
-                        fontSize: fp(1.4),
-                        color: '#565555',
-                      }}>
-                      {'   '}Edit
-                    </CustomText>
-                  </View>
-                  <View
-                    style={{
-                      borderTopColor: '#F2F2F2',
-                      borderTopWidth: fp(0.2),
-                      width: '100%',
-                    }}
-                  />
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      padding: 5,
-                    }}>
-                    <Image
-                      source={CommentDeleteIcon}
-                      style={{
-                        height: fp(1.4),
-                        width: fp(1.4),
-                        marginLeft: wp(2),
-                      }}
-                      resizeMode="contain"
-                    />
-                    <CustomText
-                      type={'typeRegular'}
-                      style={{
-                        fontFamily: typography.Inter_Medium,
-                        fontSize: fp(1.4),
-                        color: '#565555',
-                      }}>
-                      {'   '}Delete
-                    </CustomText>
-                  </View>
-                </View>
-              )}
-              <Pressable
-                style={{height: fp(2), width: fp(2)}}
-                onPress={() => {
-                  handleCommentMenu(item?.id);
-                }}>
-                <Image
-                  source={CommentMenu}
-                  style={{
-                    height: fp(2),
-                    width: fp(2),
-                    marginTop: hp(0.2),
-                    alignSelf: 'flex-end',
+              {openCommentMenuIndex === item?.id ? (
+                <CommentMenuModal
+                  handleCommentEdit={() => handleCommentEdit(item)}
+                  handleCommentDelete={() => {
+                    handleCommentDelete(item?.id);
                   }}
-                  resizeMode="contain"
                 />
-              </Pressable>
+              ) : null}
+
+              {parseInt(userId) === item?.user_id ? (
+                <Pressable
+                  style={{height: fp(2), width: fp(2)}}
+                  hitSlop={fp(4)}
+                  onPress={() => {
+                    handleCommentMenu(item?.id);
+                  }}>
+                  <Image
+                    source={CommentMenu}
+                    style={{
+                      height: fp(2),
+                      width: fp(2),
+                      marginTop: hp(0.2),
+                      alignSelf: 'flex-end',
+                      // marginRight: 20,
+                      right: 10,
+                      position: 'absolute',
+                    }}
+                    resizeMode="contain"
+                  />
+                </Pressable>
+              ) : null}
             </View>
+            {item?.image ? (
+              <Image
+                source={{uri: item?.image}}
+                style={{
+                  height: fp(8),
+                  width: fp(12),
+                  marginTop: hp(2),
+                  borderRadius: fp(1),
+                }}
+                resizeMode="cover"
+              />
+            ) : null}
 
             <CustomText
               type={'typeRegular'}
@@ -682,7 +747,7 @@ const BookVideos: React.FC = ({route}) => {
                 fontFamily: typography.Inter_Regular,
                 fontSize: fp(1.4),
                 color: '#565555',
-                width: wp(80),
+                width: wp(75),
                 marginTop: hp(0.6),
                 textAlign: 'justify',
                 lineHeight: 15,
@@ -690,7 +755,9 @@ const BookVideos: React.FC = ({route}) => {
               {item?.content}
             </CustomText>
 
-            <Pressable onPress={handleCommentReply} style={{marginTop: hp(1)}}>
+            <Pressable
+              onPress={() => handleCommentReply(item?.id)}
+              style={{marginTop: hp(1)}}>
               <CustomText
                 type={'typeRegular'}
                 style={{
@@ -701,12 +768,25 @@ const BookVideos: React.FC = ({route}) => {
                 Reply
               </CustomText>
             </Pressable>
+
             <View style={{marginTop: hp(1.4)}}>
               <FlatList data={item.replies} renderItem={renderCommentReply} />
             </View>
           </View>
         </View>
-      </>
+        {showCommentReplyInputIndex == item?.id ? (
+          <CommentReplyInput
+            refReplyInput={refReplyInput}
+            commentText={replyText}
+            onChangeComment={onChangeCommentReply}
+            handleSendComment={() =>
+              editReplyFlow
+                ? handleSendEditedReply(item?.id)
+                : handleSendCommentReply(item?.id)
+            }
+          />
+        ) : null}
+      </View>
     );
   }
 
@@ -725,9 +805,121 @@ const BookVideos: React.FC = ({route}) => {
       }
     }
   };
-  return (
-    // <>
+  const requestCameraPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: 'Camera Permission',
+            message: 'App needs camera permission',
+          },
+        );
+        // If CAMERA Permission is granted
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    } else return true;
+  };
 
+  const handleOpenCamera = async () => {
+    const isCameraPermitted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.CAMERA,
+      {
+        title: 'Camera Permission',
+        message: 'This app needs access to your camera.',
+        buttonPositive: 'OK',
+        buttonNegative: 'Cancel',
+      },
+    );
+    // if (isCameraPermitted) {
+    try {
+      await launchCamera(
+        {
+          mediaType: 'photo',
+        },
+        response => {
+          console.log('🚀 ~ handleOpenGallery ~ response:', response);
+
+          if (response.didCancel) {
+            Alert.alert('Information', 'Operation Cancelled');
+            return;
+          } else if (response.errorCode == 'camera_unavailable') {
+            Alert.alert('Information', 'Camera not available on device');
+            return;
+          } else if (response.errorCode == 'permission') {
+            Alert.alert('Information', 'Permission not satisfied');
+            return;
+          } else if (response.errorCode == 'others') {
+            Alert.alert('Information', response.errorMessage);
+            return;
+          } else {
+            setImageResponse(response?.assets[0]);
+            setImageResponseUI(response?.assets[0]);
+          }
+        },
+      );
+    } catch (error) {
+      console.error('Error launching camera:', error);
+    }
+    // }
+    setShowAddPhotoModal(false);
+  };
+
+  const handleOpenGallery = async () => {
+    const isStoragePermitted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+      {
+        title: 'Storage Permission',
+        message: 'This app needs access to your device storage to read files.',
+        buttonPositive: 'OK',
+        buttonNegative: 'Cancel',
+      },
+    );
+    if (isStoragePermitted) {
+      launchImageLibrary(
+        {
+          mediaType: 'photo',
+        },
+        response => {
+          console.log(
+            '🚀 ~ handleOpenGallery ~ response:',
+            response?.assets[0],
+          );
+
+          setImageResponse(response?.assets[0]);
+          setImageResponseUI(response?.assets[0]);
+          if (response.didCancel) {
+            Alert.alert('Information', 'Operation Cancelled');
+            return;
+          } else if (response.errorCode == 'camera_unavailable') {
+            Alert.alert('Information', 'Camera not available on device');
+            return;
+          } else if (response.errorCode == 'permission') {
+            Alert.alert('Information', 'Permission not satisfied');
+            return;
+          } else if (response.errorCode == 'others') {
+            Alert.alert('Information', response.errorMessage);
+            return;
+          }
+        },
+      );
+    }
+    setShowAddPhotoModal(false);
+  };
+
+  const handleIsLandscapeCb = (params: type) => {
+    console.log('🚀 ~ handleIsLandscapeCb ~ params:', params);
+    setIsLandscape(params);
+  };
+  // function handleIsLandscapeCb(params) {
+
+  // }
+  function handleCommentPress() {}
+
+  return (
     <View style={{flex: 1}}>
       {!isLandscape ? (
         <>
@@ -744,343 +936,183 @@ const BookVideos: React.FC = ({route}) => {
         backgroundColor={color.PRIMARY_BLUE}
         barStyle="light-content"
       />
-      {videoLoading ? (
+      <VideoPlayerEx
+        uri={BookDetails}
+        handleIsLandscapeCb={handleIsLandscapeCb}
+      />
+      {/* <View style={{flex: 1}}> */}
+      <View style={{marginLeft: wp(4)}}>
+        <CustomText
+          type={'typeRegular'}
+          style={{
+            fontFamily: typography.Inter_Bold,
+            fontSize: fp(2.8),
+            color: color.PRIMARY_BLUE,
+            marginTop: hp(1),
+          }}>
+          {bookVideosRes?.title}
+        </CustomText>
+      </View>
+      <View style={styles.likeButtonContainer}>
+        <LikeButton
+          imgName={'like'}
+          count={bookVideosRes?.likesCount}
+          onPress={handleLikePress}
+          pressed={likePressed}
+        />
+        <CommentButton
+          imgName={'comment'}
+          count={bookVideosRes?.comments?.length}
+          onPress={handleCommentPress}
+          pressed={'comment'}
+        />
+        <DislikeButton
+          imgName={'dislike'}
+          count={bookVideosRes?.dislikesCount}
+          onPress={handleDislikePress}
+        />
+      </View>
+      {/* {likePressed == && (
+          <CustomText
+            type={'typeRegular'}
+            style={{
+              fontFamily: typography.Inter_Bold,
+              fontSize: fp(1.2),
+              color: '#878787',
+              marginLeft: wp(3),
+              marginTop: hp(1),
+            }}>
+            Shubham liked this video
+          </CustomText>
+        )} */}
+      <View
+        style={{
+          marginBottom: hp(1),
+          // backgroundColor: 'green',
+        }}>
         <View
           style={{
+            borderWidth: fp(0.1),
+            borderColor: '#F7F7F7',
+            marginTop: hp(2),
+          }}
+        />
+
+        <CommentInput
+          refInput={refInput}
+          commentText={commentText}
+          onChangeComment={onChangeComment}
+          handleSendComment={
+            editCommentFlow ? handleSendEditedComment : handleSendComment
+          }
+          handleAddAttachment={handleAddAttachment}
+          uri={imageResponseUI?.uri ? imageResponseUI?.uri : null}
+          isLandscape={isLandscape}
+        />
+      </View>
+
+      {/* //?comment section */}
+      <View style={{flex: 1, paddingBottom: hp(2), backgroundColor: '#F7F7F7'}}>
+        <FlatList data={commentsData} renderItem={renderComments} />
+      </View>
+      {/* </View> */}
+
+      {showAddPhotoModal ? (
+        <Pressable
+          onPress={() => setShowAddPhotoModal(false)}
+          style={{
+            position: 'absolute',
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
+            height: hp(100),
+            width: wp(100),
             backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            // backgroundColor: 'red',
           }}>
-          <ActivityIndicator size="large" color={color.WHITE} />
-        </View>
-      ) : (
-        <View style={{flex: 1}}>
-          {bookVideosRes?.length > 0 ? (
-            <TouchableOpacity
-              style={{
-                width: '100%',
-                height: isLandscape ? '100%' : '30%',
-              }}
-              activeOpacity={1}
-              onPress={() => {
-                setIsVideoPlayerActive(!isVideoPlayerActive);
-              }}>
-              <Video
-                resizeMode="cover"
-                ref={videoRef}
-                muted={isMuted}
-                repeat
-                paused={paused}
-                source={{uri: bookVideosRes[currentVideoIndex].video_url}}
-                style={[
-                  isLandscape ? styles.video_horizontal : styles.video_vertical,
-                ]}
-                rate={playbackSpeed}
-                onProgress={onProgress}
-                onLoadStart={onLoadStart}
-                onVideoLoadStart={onVideoLoadStart}
-                onError={onError}
-                onBuffer={onVideoBuffer}
-                onReadyForDisplay={onReadyForDisplay}
-                onLoad={onLoad}></Video>
-
-              {isVideoPlayerActive && (
-                <TouchableOpacity
-                  onPress={() => {
-                    setIsVideoPlayerActive(!isVideoPlayerActive);
-                  }}
-                  style={{
-                    backgroundColor: 'rgba(0,0,0,0.3)',
-                    height: '100%',
-                    width: '100%',
-                    position: 'absolute',
-                  }}>
-                  {/* <TouchableOpacity
-                style={{
-                  top: responsiveHeight(2),
-                  left: '90%',
-                  // alignSelf:"center"
-                }}
-                onPress={() => {
-                  setShowSettings(!showSettings);
-                }}>
-                <Image source={settings_img} style={styles.big_imgs_style} />
-              </TouchableOpacity> */}
-                  {isVideoPlayerActive && (
-                    <View
-                      style={
-                        isLandscape
-                          ? styles.big_btns_flex_ver
-                          : styles.big_btns_flex_hor
-                      }>
-                      <TouchableOpacity onPress={playPreviousVideo}>
-                        <Image
-                          source={PrevIcon}
-                          style={styles.big_imgs_style}
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        activeOpacity={0.5}
-                        onPress={() => {
-                          togglePlayPause();
-                        }}>
-                        <Image
-                          source={paused ? PauseIcon : PlayIcon}
-                          style={[styles.big_imgs_style, {tintColor: 'white'}]}
-                        />
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        onPress={() => {
-                          playNextVideo();
-                        }}>
-                        <Image
-                          source={NextIcon}
-                          style={styles.big_imgs_style}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  )}
-
-                  {isVideoPlayerActive && (
-                    <Slider
-                      style={styles.slider}
-                      minimumValue={0}
-                      maximumValue={duration}
-                      value={currentTime}
-                      minimumTrackTintColor="blue"
-                      maximumTrackTintColor="#ffff"
-                      thumbTintColor="blue"
-                      onValueChange={onSeek}
-                      onSlidingComplete={onSeekComplete}
-                    />
-                  )}
-
-                  <View style={styles.bottom_things_con}>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        gap: isLandscape
-                          ? responsiveHeight(3)
-                          : responsiveHeight(2.7),
-                        alignItems: 'center',
-                      }}>
-                      <TouchableOpacity onPress={playPreviousVideo}>
-                        <Image
-                          source={PrevIcon}
-                          style={styles.small_imgs_style}
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={togglePlayPause}>
-                        <Image
-                          source={paused ? PauseIcon : PlayIcon}
-                          style={[
-                            styles.small_imgs_style,
-                            {tintColor: 'white'},
-                          ]}
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={playNextVideo}>
-                        <Image
-                          source={NextIcon}
-                          style={styles.small_imgs_style}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                    <View style={styles.timeContainer}>
-                      <Text style={styles.timeText}>
-                        {formatTime(currentTime)}
-                      </Text>
-                      <Text style={styles.timeText}>
-                        {formatTime(duration)}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <TouchableOpacity
-                    onPress={() => {
-                      setIsVideoPlayerActive(true);
-                      toggleOrientation();
-                    }}
-                    style={{
-                      position: 'absolute',
-                      right: responsiveHeight(2),
-                      bottom: responsiveHeight(1.3),
-                    }}>
-                    <Image
-                      source={OrientationIcon}
-                      style={styles.small_imgs_style_landscape}
-                    />
-                  </TouchableOpacity>
-                </TouchableOpacity>
-              )}
-            </TouchableOpacity>
-          ) : (
-            <ActivityIndicator color={'blue'} />
-          )}
-
-          <View style={{marginLeft: wp(4)}}>
+          <View
+            style={{
+              height: hp(28),
+              width: wp(75),
+              borderRadius: fp(2),
+              position: 'absolute',
+              backgroundColor: 'white',
+              // bottom: 0,
+              top: hp(20),
+              marginHorizontal: wp(10),
+              alignSelf: 'center',
+              // left: 0,
+              // right: 0,
+            }}>
             <CustomText
               type={'typeRegular'}
               style={{
                 fontFamily: typography.Inter_Bold,
-                fontSize: fp(2.8),
+                fontSize: fp(2.2),
                 color: color.PRIMARY_BLUE,
-                marginTop: hp(1),
+                // marginTop: hp(1),
+                padding: fp(2),
               }}>
-              Software Engineering
+              Add Photo
+            </CustomText>
+            <View style={{borderTopWidth: fp(0.2), borderColor: color.GREY}} />
+            <CustomText
+              type={'typeRegular'}
+              onPress={handleOpenCamera}
+              style={{
+                fontFamily: typography.Inter_Medium,
+                fontSize: fp(2),
+                color: '#555555',
+                // marginTop: hp(1),
+                padding: fp(2),
+              }}>
+              Camera
+            </CustomText>
+            <View style={{borderTopWidth: fp(0.1), borderColor: color.GREY}} />
+            <CustomText
+              onPress={handleOpenGallery}
+              type={'typeRegular'}
+              style={{
+                fontFamily: typography.Inter_Medium,
+                fontSize: fp(2),
+                color: '#555555',
+                // marginTop: hp(1),
+                padding: fp(2),
+              }}>
+              Gallery
+            </CustomText>
+            <View style={{borderTopWidth: fp(0.1), borderColor: color.GREY}} />
+            <CustomText
+              type={'typeRegular'}
+              style={{
+                fontFamily: typography.Inter_Medium,
+                fontSize: fp(2),
+                color: '#555555',
+                // marginTop: hp(1),
+                padding: fp(2),
+              }}>
+              Close
             </CustomText>
           </View>
-          <View style={styles.likeButtonContainer}>
-            <LikeButton
-              imgName={'like'}
-              count={likeCount}
-              onPress={handleLikePress}
-            />
-            <LikeButton
-              imgName={'comment'}
-              count={commentCount}
-              onPress={handleCommentPress}
-            />
-            <LikeButton
-              imgName={'dislike'}
-              count={dislikeCount}
-              onPress={handleDislikePress}
-            />
-          </View>
-          <View>
-            <View
-              style={{
-                borderWidth: fp(0.1),
-                borderColor: '#F7F7F7',
-                marginTop: hp(2),
-              }}
-            />
-            <View
-              style={{
-                marginHorizontal: wp(3),
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
-              <Image
-                source={DummyProfImg}
-                style={{height: fp(6), width: fp(6), marginTop: hp(2)}}
-                resizeMode="contain"
-              />
-              <View
-                style={{
-                  width: wp(75),
-                  backgroundColor: '#F7F7F7',
-                  // height: fp(5),
-                  marginTop: fp(1.5),
-                  borderRadius: fp(5),
-                  marginLeft: wp(4),
-                  padding: fp(0.3),
-                }}>
-                <TextInput
-                  placeholder="Leave the comment"
-                  placeholderTextColor="#878787"
-                  style={{
-                    color: '#878787',
-                    width: wp(65),
-                  }}
-                  value={commentText}
-                  onChangeText={onChangeComment}
-                />
-              </View>
+        </Pressable>
+      ) : null}
 
-              <TouchableOpacity
-                style={{
-                  marginTop: hp(2),
-                  position: 'absolute',
-                  right: wp(6),
-                  top: hp(1.4),
-                }}
-                onPress={handleSendComment}>
-                <Image
-                  source={SendComment}
-                  style={{
-                    height: fp(2.5),
-                    width: fp(2.5),
-                  }}
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-          {/* //?comment section */}
-          <View style={{flex: 1, marginBottom: hp(2)}}>
-            <FlatList data={commentsData} renderItem={renderComments} />
-          </View>
-        </View>
+      {showCommentAlert && (
+        <CommentAlert handleClosePress={() => setShowCommentAlert(false)} />
       )}
-
-      {/* {isLoading && (
-          <ActivityIndicator
-            size="large"
-            color="blue"
-            style={styles.loadingIndicator}
-          />
-        )} */}
-      {/* USE IT FOR MUTE/UNMUTE THE VIDEO */}
-      {/* {isVideoPlayerActive && (
-          <Text onPress={() => toggleMute()}>
-            {isMuted ? 'Unmute' : 'Mute'}
-          </Text>
-        )} */}
-
-      {showSettings && (
-        <View
-          style={
-            !isLandscape
-              ? styles.modal_container_vertical
-              : styles.modal_container_horizontal
-          }>
-          <FlatList
-            data={playbackSpeedOptions}
-            renderItem={({item}) => (
-              <TouchableOpacity
-                style={
-                  isLandscape
-                    ? styles.speed_option_vertical
-                    : styles.speed_option_horizontal
-                }
-                onPress={() => selectPlaybackSpeed(item.speed)}>
-                <Text
-                  style={
-                    isLandscape
-                      ? styles.speed_option_vert
-                      : styles.speed_option_text_hori
-                  }>
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            )}
-            keyExtractor={item => item.speed.toString()}
-          />
-        </View>
+      {isLoading && (
+        <ActivityIndicator
+          size="large"
+          color={color.PRIMARY_BLUE}
+          style={styles.loadingIndicator}
+        />
       )}
     </View>
-    // </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {},
-  video_vertical: {
-    width: '100%',
-    height: '100%',
-  },
-  video_horizontal: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-  },
 
   modal_container_vertical: {
     justifyContent: 'center',
@@ -1121,21 +1153,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: responsiveHeight(1.4),
   },
-  slider: {
-    width: '100%',
-    bottom: '15%',
-    position: 'absolute',
-  },
-  timeContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    gap: responsiveHeight(1),
-    width: '100%',
-  },
-  timeText: {
-    color: '#ffffff',
-    fontSize: responsiveFontSize(1.5),
-  },
+
   loadingIndicator: {
     position: 'absolute',
     top: '50%',
@@ -1172,20 +1190,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     top: '35%',
   },
-  bottom_things_con: {
-    position: 'absolute',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    bottom: '4%',
-    left: '5%',
-    gap: responsiveHeight(1),
-  },
-  small_imgs_style_landscape: {
-    aspectRatio: 1,
-    resizeMode: 'contain',
-    height: responsiveHeight(1.8),
-  },
+
   likeButtonContainer: {
     flexDirection: 'row',
     marginHorizontal: wp(2),

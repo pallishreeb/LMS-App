@@ -28,8 +28,16 @@ const SendComment = require('./SendComment.png');
 const CommentMenu = require('./CommentMenu.png');
 const CommentDeleteIcon = require('./CmtDelete.png');
 const CommentEditIcon = require('./CmtEdit.png');
+const CommentAttachment = require('./CommentAttachment.png');
+const CommentAlertCheck = require('./CommentAlertCheck.png');
+const CommentAlertCross = require('./CommentAlertCross.png');
+const Forward = require('./forward.png');
+const Rewind = require('./rewind.png');
 
 export {
+  CommentAlertCross,
+  CommentAlertCheck,
+  CommentAttachment,
   CommentEditIcon,
   CommentDeleteIcon,
   PlayIcon,
@@ -60,4 +68,6 @@ export {
   SoftEnggBookImg,
   PaymentAlertIllus,
   OrderAlertIllus,
+  Forward,
+  Rewind,
 };
