@@ -11,6 +11,7 @@ import {styles} from './styles';
 import MainButton from '../../../components/button/MainButton';
 import {apiClient} from '../../../helpers/apiClient';
 import {endpoints} from '../../../constants/colors/endpoints';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Otp = ({navigation, route}) => {
   const {phoneNo, email, previousRoute} = route.params;
@@ -21,7 +22,10 @@ const Otp = ({navigation, route}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [res, setRes] = useState({});
   const [currentOtp, setCurrentOtp] = useState('');
-
+  async function onAlertOK(params: type) {
+    navigation.navigate('MyDrawer');
+    await AsyncStorage.setItem('loginType', 'mannual');
+  }
   const handleVerifyOtp = async () => {
     try {
       setIsLoading(true);
@@ -31,6 +35,7 @@ const Otp = ({navigation, route}) => {
       });
       console.log(response.status, 'response.status');
       if (response.status === 200) {
+        await AsyncStorage.setItem('isLogged', 'yes');
         console.log(response?.data);
         setRes(response.data);
         Alert.alert(
@@ -43,9 +48,7 @@ const Otp = ({navigation, route}) => {
           [
             {
               text: 'Ok',
-              onPress: () => {
-                navigation.navigate('BottomTab');
-              },
+              onPress: onAlertOK,
               style: 'default',
             },
           ],

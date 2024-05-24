@@ -1,11 +1,14 @@
 import {
   ActivityIndicator,
   Alert,
+  BackHandler,
   Dimensions,
   Image,
   Modal,
   Pressable,
   StatusBar,
+  Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
@@ -29,6 +32,14 @@ import ErrorMsg from '../../../components/errorMsg/ErrorMsg';
 import {useIcon} from '../../../assets/icons/useIcon';
 import {loadString, saveString} from '../../../storage/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Snackbar from 'react-native-snackbar';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import auth from '@react-native-firebase/auth';
+import DrawerIcons from '../../../assets/DrawerAssets';
+import axios from 'axios';
 
 const Login = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -42,30 +53,58 @@ const Login = ({navigation}) => {
   const [res, setRes] = useState({});
 
   const getRememberMeCredential = async () => {
+    setIsLoading(true);
     const email = await loadString('email_for_remember_me');
+    console.log('🚀 ~ getRememberMeCredential ~ email:', email);
     const password = await loadString('password_for_remember_me');
-    if (email != undefined) {
+    if (email != undefined || email != null) {
       setCheckboxState(true);
       setEmail(email);
       setPassword(password);
     }
+    setIsLoading(false);
   };
+  // useEffect(() => {
+  //   const backAction = () => {
+  //     Alert.alert('Hold on!', 'Are you sure you want to exit the app?', [
+  //       {
+  //         text: 'Cancel',
+  //         onPress: () => null,
+  //         style: 'cancel',
+  //       },
+  //       {text: 'YES', onPress: () => BackHandler.exitApp()},
+  //     ]);
+  //     return true;
+  //   };
 
+  //   const backHandler = BackHandler.addEventListener(
+  //     'hardwareBackPress',
+  //     backAction,
+  //   );
+
+  //   return () => backHandler.remove();
+  // }, []);
   useEffect(() => {
-    Alert.alert(
-      'Info',
-      `Previously, you chose to save your credentials. Would you like to use the saved credentials this time?`,
-      [
-        {
-          text: 'OK',
-          onPress: () => getRememberMeCredential(),
-        },
-        {
-          text: 'Cancel',
-          // onPress: () => console.log('pressed cancel'),
-        },
-      ],
-    );
+    getRememberMeCredential();
+    // if (email) {
+    //   setIsLoading(false);
+    //   Alert.alert(
+    //     'Quick Reminder!',
+    //     `We noticed that you've saved your login credentials during your last visit. Would you like to log in faster with those saved credentials this time?`,
+    //     [
+    //       {
+    //         text: 'Yes, Use Saved Credentials',
+    //         onPress: () => getRememberMeCredential(),
+    //       },
+    //       {
+    //         text: `No, I'll Enter Manually`,
+    //         // onPress: () => console.log('pressed cancel'),
+    //       },
+    //     ],
+    //   );
+    // } else {
+    //   setIsLoading(false);
+    // }
   }, []);
 
   useEffect(() => {
@@ -76,6 +115,110 @@ const Login = ({navigation}) => {
     getAndroidId().then(androidId => {
       setAndroidDeviceId(androidId);
     });
+  };
+
+  async function userSignupWithGoogle(userId, email, name) {
+    try {
+      setIsLoading(true);
+      console.log('🚀 ~ userSignupWithGoogle ~ name:', name);
+      console.log('🚀 ~ userSignupWithGoogle ~ email:', email);
+      console.log('🚀 ~ userSignupWithGoogle ~ userId:', userId);
+      const response = await axios.post(
+        'http://43.204.161.117/api/auth/google/callback',
+        {
+          google_id: userId,
+          email: email,
+          name: name,
+        },
+      );
+      console.log('google login response', response?.data);
+      if (response.status === 200) {
+        console.log('google login response', response?.data);
+        setRes(response.data);
+        await AsyncStorage.setItem('loginType', 'google');
+        await AsyncStorage.setItem('token', response?.data?.token);
+        await AsyncStorage.setItem(
+          'user_id',
+          response?.data?.user?.id.toString(),
+        );
+        navigation.navigate('MyDrawer');
+      }
+    } catch (error) {
+      console.log('inside catch', error.message);
+      // if (error.message == 'Request failed with status code 500') {
+      Alert.alert('Information', `${error?.response?.data?.message}`);
+      // Snackbar.show({
+      //   text: error?.response?.data?.message,
+      //   duration: 4000,
+      //   backgroundColor: colors.RED,
+      // });
+      // }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const onGoogleButtonPress = async () => {
+    console.log('🚀 ~ onGoogleButtonPress ~ onGoogleButtonPress:');
+    GoogleSignin.configure({
+      webClientId:
+        '723565053960-od53ug0qkd44176je7067hhijuqoie8v.apps.googleusercontent.com',
+      offlineAccess: true,
+    });
+
+    try {
+      await GoogleSignin.hasPlayServices();
+      const {idToken} = await GoogleSignin.signIn();
+      console.log('🚀 ~ onGoogleButtonPress ~ idToken:', idToken);
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      await auth().signInWithCredential(googleCredential);
+      const currentUser = auth().currentUser;
+      if (currentUser) {
+        console.log('User ID:', currentUser.uid);
+        console.log('Email:', currentUser.email);
+        console.log('Display Name:', currentUser.displayName);
+        console.log('Profile Picture:', currentUser.photoURL);
+        console.log('idToken:', idToken);
+        userSignupWithGoogle(
+          currentUser.uid,
+          currentUser.email,
+          currentUser.displayName,
+        );
+      } else {
+        console.log('No user is currently signed in.');
+      }
+    } catch (error) {
+      console.log('Error:', error);
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // User cancelled the sign-in process
+        Snackbar.show({
+          text: 'User cancelled the sign-in process',
+          duration: 4000,
+          backgroundColor: color.RED,
+        });
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // Sign-in process is already in progress
+        Snackbar.show({
+          text: 'Sign-in process is already in progress',
+          duration: 4000,
+          backgroundColor: color.RED,
+        });
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // Play Services not available or outdated
+        Snackbar.show({
+          text: 'Play Services not available or outdated',
+          duration: 4000,
+          backgroundColor: color.RED,
+        });
+      } else {
+        // Other error occurred
+        Snackbar.show({
+          text: 'Other error occurred',
+          duration: 4000,
+          backgroundColor: color.RED,
+        });
+      }
+    }
   };
 
   const handleEmail = (text: React.SetStateAction<string>) => {
@@ -89,6 +232,7 @@ const Login = ({navigation}) => {
         : '',
     );
   };
+
   const handlePassword = (text: React.SetStateAction<string>) => {
     setPassword(text);
     validatePassword(text);
@@ -120,7 +264,10 @@ const Login = ({navigation}) => {
       setPasswordErrorMsg('');
     }
   };
-
+  async function onAlertOK(params: type) {
+    navigation.navigate('MyDrawer');
+    await AsyncStorage.setItem('loginType', 'mannual');
+  }
   const handleLogin = async () => {
     try {
       if (checkboxState === true) {
@@ -146,7 +293,7 @@ const Login = ({navigation}) => {
           Alert.alert('Information', `${response.data.message}`, [
             {
               text: 'Ok',
-              onPress: () => navigation.navigate('BottomTab'),
+              onPress: onAlertOK,
               style: 'default',
             },
           ]);
@@ -254,6 +401,35 @@ const Login = ({navigation}) => {
         <View style={styles.btnContainer}>
           <MainButton _onPress={handleLogin} _title="Login" />
         </View>
+        <View style={{alignSelf: 'center', marginTop: hp(2)}}>
+          <Text style={styles.orText}>Or</Text>
+        </View>
+
+        <TouchableOpacity style={styles.button} onPress={onGoogleButtonPress}>
+          <Text style={styles.text}>Continue with Google</Text>
+          <Image
+            source={DrawerIcons.GoogleIcon}
+            style={{
+              height: fp(2),
+              width: fp(2),
+              alignSelf: 'center',
+              marginLeft: wp(2),
+              // marginTop: hp(2),
+            }}
+          />
+        </TouchableOpacity>
+        {/* <Pressable onPress={onGoogleButtonPress}>
+          <Image
+            source={DrawerIcons.GoogleIcon}
+            style={{
+              height: fp(3),
+              width: fp(3),
+              alignSelf: 'center',
+              marginTop: hp(2),
+            }}
+          />
+        </Pressable> */}
+
         <View style={styles.bottomText}>
           <CustomText type={'textRegular'}>Don't have an account? </CustomText>
           <CustomText

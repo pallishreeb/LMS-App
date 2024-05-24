@@ -28,6 +28,11 @@ const Books = ({navigation}) => {
       const response = await apiClient.get(`${endpoints.GET_BOOKS}`);
       console.log(response.status, 'response.status');
       if (response.status === 200) {
+        console.log(
+          '🚀 ~ handleGetBooks ~ response?.data?.books:',
+          response?.data?.books,
+        );
+
         setBookDetails(response?.data?.books);
         setIsLoading(false);
       }
@@ -89,7 +94,7 @@ const Books = ({navigation}) => {
                 fontSize: fp(1.2),
                 marginLeft: wp(0.5),
               }}>
-              Author: Mia shazad
+              Author: Sohoj Pora
             </CustomText>
             {/* )} */}
             <CustomText

@@ -116,4 +116,12 @@ export const useIcon = {
   ArrowLeft: () => (
     <AntDesign name="arrowleft" size={fp(3.2)} color={color.WHITE} />
   ),
+  SendIcon: () => (
+    <Ionicons
+      name="send"
+      size={fp(3.2)}
+      color={'#828282'}
+      // style={{marginRight: wp(2)}}
+    />
+  ),
 };

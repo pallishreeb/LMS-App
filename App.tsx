@@ -6,6 +6,9 @@ import BeforeLoginStack from './app/components/navigators/BeforeLoginStack';
 import SplashScreen from 'react-native-splash-screen';
 import {Provider} from 'react-redux';
 import {store} from './app/redux/Store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import MyOrders from './app/screens/afterLogin/MyOrders/MyOrders';
+import {MyDrawer} from './app/helpers/DrawerNavigation/DrawerNavigation';
 export default function App() {
   useEffect(() => {
     setTimeout(() => {
@@ -13,10 +16,28 @@ export default function App() {
     }, 3000);
   }, []);
 
+  const [isLogged, setIsLogged] = React.useState('');
+  const [token, setToken] = React.useState('');
+  const [isloading, setIsLoading] = React.useState(false);
+  async function getLoggedIn() {
+    setIsLoading(true);
+    const token = await AsyncStorage.getItem('token');
+    console.log('🚀 ~ getLoggedIn ~ token:', token);
+    setToken(token);
+    if (token == '') {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
+  }
+  useEffect(() => {
+    getLoggedIn();
+  }, []);
+
   return (
     <Provider store={store}>
       <NavigationContainer>
-        <BeforeLoginStack />
+        {token ? <MyDrawer /> : <BeforeLoginStack />}
       </NavigationContainer>
     </Provider>
   );

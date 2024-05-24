@@ -13,8 +13,6 @@ import {
   Alert,
 } from 'react-native';
 
-import {Picker} from '@react-native-picker/picker';
-
 import Video, {
   OnLoadData,
   OnProgressData,

@@ -49,7 +49,7 @@ const BookCard = ({bookDetails, showAuthor}) => {
                   fontSize: fp(1.2),
                   marginLeft: wp(0.5),
                 }}>
-                Author: Mia shazad
+                Author: Sohoj Pora
               </CustomText>
             )}
 

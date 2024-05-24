@@ -5,32 +5,56 @@ import {
   View,
   Linking,
   ActivityIndicator,
+  Text,
 } from 'react-native';
 import Pdf from 'react-native-pdf';
+import {
+  BallIndicator,
+  BarIndicator,
+  DotIndicator,
+  MaterialIndicator,
+  PacmanIndicator,
+  PulseIndicator,
+  SkypeIndicator,
+  UIActivityIndicator,
+  WaveIndicator,
+} from 'react-native-indicators';
+import {fp, hp, wp} from '../../../helpers/resDimension';
+import {createEntityAdapter} from '@reduxjs/toolkit';
+import {color} from '../../../constants/colors/colors';
+import CustomText from '../../../components/text/CustomText';
+import {ProgressBar} from '@react-native-community/progress-bar-android';
+import Header from '../../../components/header/Header';
+import RNFetchBlob from 'rn-fetch-blob';
 
 const PdfViewer = ({navigation, route}) => {
   const {BookDetails} = route.params;
+
   // const source = {
-  //   uri: `${BASE_URL}pdf-url/${2}`,
+  //   uri: `${BookDetails.pdf_book}`,
   //   cache: true,
   // };
-  const [loadingPercent, setLoadingPercent] = useState(0);
+  const fileName = `${BookDetails?.title}.pdf`;
+  const cacheDir = RNFetchBlob.fs.dirs.CacheDir;
+  const filePath = `${cacheDir}/${fileName}`;
   const source = {
-    uri: `${BookDetails.pdf_book}`,
+    uri: filePath,
     cache: true,
   };
 
-  const handlePdfLoading = e => {
-    setLoadingPercent(e);
-    console.log('🚀 ~ handlePdfLoading ~ e:', e);
-    console.log('🚀 ~ handlePdfLoading ~ e:', typeof e);
-  };
+  // const handlePdfLoading = e => {
+  //   setIsLoading(true);
+  //   setPdfLoadingPercentage(e);
+  // };
 
   return (
     <View style={styles.container}>
       <Pdf
         trustAllCerts={false}
         source={source}
+        // onLoadProgress={progress => {
+        //   console.log('loading Progress', progress);
+        // }}
         onLoadComplete={(numberOfPages, filePath) => {
           console.log(`Number of pages: ${numberOfPages}`);
         }}
@@ -41,13 +65,11 @@ const PdfViewer = ({navigation, route}) => {
           console.log(error);
         }}
         onPressLink={uri => {
-          // Linking.openURL(`${uri}`);
           navigation.navigate('BookVideos', {BookDetails: uri});
-          // navigation.navigate('BookVideos', {BookDetails: uri});
           console.log(`Link pressed: ${uri}`);
         }}
         style={styles.pdf}
-        onLoadProgress={e => handlePdfLoading(e)}
+        // onLoadProgress={handlePdfLoading}
       />
     </View>
   );
@@ -58,10 +80,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    marginTop: 25,
+    // marginTop: 25,
+    backgroundColor: color.WHITE,
   },
   pdf: {
     flex: 1,
+
+    // width: wp(100),
+    // height: hp(100),
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
   },

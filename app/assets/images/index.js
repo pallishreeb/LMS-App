@@ -9,6 +9,8 @@ const courses = require('./Courses.png');
 const coursesActive = require('./CoursesActive.png');
 const profile = require('./Profile.png');
 const profileActive = require('./ProfileActive.png');
+const chatIcon = require('./ChatIcon.png');
+const chatIconActive = require('./ChatIconActive.png');
 const dummyRecommend = require('./RecommededImg.png');
 const BookCoverImg = require('./BookCoverImg.png');
 const CourseCoverImg = require('./CourseCoverImg.png');
@@ -33,8 +35,19 @@ const CommentAlertCheck = require('./CommentAlertCheck.png');
 const CommentAlertCross = require('./CommentAlertCross.png');
 const Forward = require('./forward.png');
 const Rewind = require('./rewind.png');
+const CameraIcon = require('./cameraIcon.png');
+const ClockIcon = require('./Clock.png');
+const PlayButton = require('./PlayButton.png');
+const OpenBook = require('./OpenBook.png');
+const Download = require('./Download.png');
+const Update = require('./Update.png');
 
 export {
+  Update,
+  Download,
+  chatIcon,
+  chatIconActive,
+  CameraIcon,
   CommentAlertCross,
   CommentAlertCheck,
   CommentAttachment,
@@ -70,4 +83,7 @@ export {
   OrderAlertIllus,
   Forward,
   Rewind,
+  ClockIcon,
+  PlayButton,
+  OpenBook,
 };

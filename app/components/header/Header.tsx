@@ -1,9 +1,9 @@
-import {Text, TouchableOpacity, View} from 'react-native';
+import {Pressable, Text, TouchableOpacity, View} from 'react-native';
 import React, {useContext} from 'react';
 
 import {styles} from './styles';
 import {useNavigation} from '@react-navigation/native';
-import {hp} from '../../helpers/resDimension';
+import {fp, hp} from '../../helpers/resDimension';
 import {useIcon} from '../../assets/icons/useIcon';
 import {typography} from '../../assets/fonts/typography';
 
@@ -16,6 +16,7 @@ const Header = props => {
     rightIcon = true,
     leftIconName = 'arrowleft',
     title = `Getting Started`,
+    onRightPress,
     // marginLeft = Platform.OS === 'ios' ? hp(11) : hp(11),
     marginLeft = hp(11),
     font,
@@ -25,11 +26,11 @@ const Header = props => {
       <View style={styles.innerWrapper}>
         {
           leftIcon ? (
-            <TouchableOpacity onPress={() => onPress()}>
+            <Pressable onPress={onPress} hitSlop={fp(3)}>
               {leftIconName == 'leftArrow'
                 ? useIcon.ArrowLeft()
                 : useIcon.Menu()}
-            </TouchableOpacity>
+            </Pressable>
           ) : null
           // <View style={styles.placeHolderView} />
         }
@@ -46,7 +47,7 @@ const Header = props => {
           {title}
         </Text>
         {rightIcon ? (
-          <TouchableOpacity onPress={() => onPress()}>
+          <TouchableOpacity onPress={onRightPress}>
             {useIcon.UserIcon()}
           </TouchableOpacity>
         ) : null}

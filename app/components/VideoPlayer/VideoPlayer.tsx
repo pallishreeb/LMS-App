@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Pressable,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 import {fp, hp, wp} from '../../helpers/resDimension';
 import Video, {VideoRef} from 'react-native-video';
@@ -25,8 +25,21 @@ import Orientation from 'react-native-orientation-locker';
 import Slider from '@react-native-community/slider';
 import {typography} from '../../assets/fonts/typography';
 import {color} from '../../constants/colors/colors';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 
 const VideoPlayerEx = ({uri, handleIsLandscapeCb}) => {
+  const navigation = useNavigation();
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('transitionStart', () => {
+      setPaused(true);
+    });
+    return unsubscribe;
+  }, [navigation]);
+  const isFocus = useIsFocused();
+  useEffect(() => {
+    setPaused(!isFocus);
+  }, [isFocus]);
+
   const videoRef = useRef<any>(null);
   //states
   const [isLandscape, setIsLandscape] = useState(false);
@@ -117,7 +130,7 @@ const VideoPlayerEx = ({uri, handleIsLandscapeCb}) => {
           setIsVideoPlayerActive(!isVideoPlayerActive);
         }}>
         <Video
-          resizeMode="cover"
+          resizeMode="contain"
           ref={videoRef}
           // muted={isMuted}
           repeat
@@ -132,6 +145,11 @@ const VideoPlayerEx = ({uri, handleIsLandscapeCb}) => {
           // rate={playbackSpeed}
           onProgress={onProgress}
           onLoadStart={onLoadStart}
+          // selectedVideoTrack={{
+          //   type: 'resolution',
+          //   value: 480,
+          // }}
+
           // onVideoLoadStart={onVideoLoadStart}
           // onError={onError}
           // onBuffer={onVideoBuffer}

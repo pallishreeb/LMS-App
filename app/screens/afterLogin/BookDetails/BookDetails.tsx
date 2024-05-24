@@ -51,7 +51,7 @@ const BookDetails = ({navigation, route}) => {
             style={{
               backgroundColor: color.WHITE,
               width: wp(100),
-              height: hp(68),
+              height: hp(70),
               marginTop: hp(13),
               shadowColor: '#000',
               shadowOffset: {
@@ -225,7 +225,10 @@ const BookDetails = ({navigation, route}) => {
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
+
               paddingHorizontal: wp(5),
+              paddingVertical: hp(1),
+              height: hp(10),
             }}>
             <CustomText
               type={'typeRegular'}
@@ -234,13 +237,14 @@ const BookDetails = ({navigation, route}) => {
                 fontSize: fp(2.35),
                 color: color.PRIMARY_BLUE,
                 lineHeight: fp(2.7),
-                marginTop: hp(3),
+                // marginTop: hp(3),
                 alignSelf: 'center',
               }}>
               {' '}
               ৳ {BookDetails?.price}
             </CustomText>
             <ButtonComp
+              marginTop={0}
               title="Buy Now"
               onPress={() => {
                 setShowPaymentAlert(true);

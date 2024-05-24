@@ -8,6 +8,8 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import {
   books,
   booksActive,
+  chatIcon,
+  chatIconActive,
   courses,
   coursesActive,
   dashboard,
@@ -20,6 +22,7 @@ import Home from '../screens/afterLogin/Home/Home';
 import Courses from '../screens/afterLogin/Courses/Courses';
 import Profile from '../screens/afterLogin/Profile/Profile';
 import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
+import Chat from '../screens/afterLogin/Chat/Chat';
 
 const Tab = createBottomTabNavigator();
 const BottomTab = () => {
@@ -56,6 +59,8 @@ const BottomTab = () => {
             iconSource = focused ? coursesActive : courses;
           } else if (route.name === 'Profile') {
             iconSource = focused ? profileActive : profile;
+          } else if (route.name === 'Chat') {
+            iconSource = focused ? chatIconActive : chatIcon;
           }
 
           // Return the icon component
@@ -109,6 +114,13 @@ const BottomTab = () => {
       <Tab.Screen
         name="Profile"
         component={Profile}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="Chat"
+        component={Chat}
         options={{
           headerShown: false,
         }}

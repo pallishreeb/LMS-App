@@ -37,7 +37,7 @@ import {useDispatch} from 'react-redux';
 import {dislike, like} from '../../../redux/likeSlice';
 import DislikeButton from '../../../components/LikeButton/DislikeButton';
 import CommentButton from '../../../components/LikeButton/CommentButton';
-const BookVideos: React.FC = ({route}) => {
+const BookVideos: React.FC = ({navigation, route}) => {
   const {BookDetails} = route.params;
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -917,6 +917,11 @@ const BookVideos: React.FC = ({route}) => {
   // function handleIsLandscapeCb(params) {
 
   // }
+  function onLeftPress(params: type) {
+    navigation.goBack();
+    setPause(true);
+  }
+  const [pause, setPause] = useState(true);
   function handleCommentPress() {}
 
   return (
@@ -928,6 +933,7 @@ const BookVideos: React.FC = ({route}) => {
             backgroundColor={color.PRIMARY_BLUE}
             font={'regular'}
             leftIconName={'leftArrow'}
+            onPress={onLeftPress}
           />
         </>
       ) : null}

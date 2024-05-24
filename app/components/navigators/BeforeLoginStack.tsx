@@ -9,21 +9,17 @@ import Payment from '../../screens/afterLogin/Payment/Payment';
 import PdfViewer from '../../screens/afterLogin/PdfViewer/PdfViewer';
 import BookVideos from '../../screens/afterLogin/BookVideos/BookVideos';
 import VideoPlayerEx from '../VideoPlayer/VideoPlayer';
+import {MyDrawer} from '../../helpers/DrawerNavigation/DrawerNavigation';
+import Courses from '../../screens/afterLogin/Courses/Courses';
+import CourseDetails from '../../screens/afterLogin/CourseDetails/CourseDetails';
+import MyOrders from '../../screens/afterLogin/MyOrders/MyOrders';
+import PaymentInfo from '../../screens/afterLogin/PaymentInfo/PaymentInfo';
+import ChapterVideo from '../../screens/afterLogin/ChapterVideos/ChapterVideo';
 
 const Stack = createStackNavigator();
 const BeforeLoginStack = route => {
   return (
-    <Stack.Navigator
-      initialRouteName={'Login'}
-      screenOptions={{
-        headerStyle: {elevation: 0},
-        cardStyle: {backgroundColor: '#fff'},
-      }}>
-      <Stack.Screen
-        name="BottomTab"
-        component={BottomTab}
-        options={{headerShown: false}}
-      />
+    <Stack.Navigator>
       <Stack.Screen
         name="Login"
         component={Login}
@@ -41,35 +37,10 @@ const BeforeLoginStack = route => {
         options={{headerShown: false}}
       />
       <Stack.Screen
-        name="BookDetails"
-        component={BookDetails}
+        name="MyDrawer"
+        component={MyDrawer}
         options={{headerShown: false}}
       />
-      <Stack.Screen
-        name="Payment"
-        component={Payment}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="PdfViewer"
-        component={PdfViewer}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="BookVideos"
-        component={BookVideos}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="VideoPlayerEx"
-        component={VideoPlayerEx}
-        options={{headerShown: false}}
-      />
-      {/* <Stack.Screen
-        name="VideoScreen"
-        component={VideoScreen}
-        options={{headerShown: false}}
-      /> */}
     </Stack.Navigator>
   );
 };

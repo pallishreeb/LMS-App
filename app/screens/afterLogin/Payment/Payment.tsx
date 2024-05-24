@@ -177,7 +177,8 @@ const Payment = ({navigation, route}) => {
           img={OrderAlertIllus}
           onPress={() => {
             setShowOrderAlert(false);
-            navigation.navigate('PdfViewer', {BookDetails: BookDetails});
+            // navigation.navigate('PdfViewer', {BookDetails: BookDetails});
+            navigation.navigate('PdfBooks', {BookDetails: BookDetails});
             // navigation.navigate('BookVideos', {BookDetails: BookDetails});
           }}
           onClosePress={() => {
