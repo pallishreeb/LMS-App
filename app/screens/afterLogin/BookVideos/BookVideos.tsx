@@ -37,6 +37,7 @@ import {useDispatch} from 'react-redux';
 import {dislike, like} from '../../../redux/likeSlice';
 import DislikeButton from '../../../components/LikeButton/DislikeButton';
 import CommentButton from '../../../components/LikeButton/CommentButton';
+import {useNavigationState} from '@react-navigation/native';
 const BookVideos: React.FC = ({navigation, route}) => {
   const {BookDetails} = route.params;
   const dispatch = useDispatch();
@@ -917,8 +918,12 @@ const BookVideos: React.FC = ({navigation, route}) => {
   // function handleIsLandscapeCb(params) {
 
   // }
+  const routes = useNavigationState(state => state.routes);
+  console.log(routes);
   function onLeftPress(params: type) {
     navigation.goBack();
+    // navigation.navigate('PdfBooks');
+
     setPause(true);
   }
   const [pause, setPause] = useState(true);

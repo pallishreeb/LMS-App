@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   Touchable,
   Image,
-  NativeModules,
   Button,
   StyleSheet,
   Pressable,

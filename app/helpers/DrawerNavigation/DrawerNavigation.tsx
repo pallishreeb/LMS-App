@@ -121,6 +121,11 @@ export function MyDrawer() {
         component={PdfBooks}
         options={{headerShown: false}}
       />
+      <Drawer.Screen
+        name="Login"
+        component={Login}
+        options={{headerShown: false}}
+      />
     </Drawer.Navigator>
   );
 }

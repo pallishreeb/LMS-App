@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
   bottomText: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: hp(2),
+    marginTop: hp(1),
   },
   illustrationContainer: {
     backgroundColor: 'white',

@@ -23,7 +23,6 @@ import {fp, hp, wp} from '../../../helpers/resDimension';
 import {createEntityAdapter} from '@reduxjs/toolkit';
 import {color} from '../../../constants/colors/colors';
 import CustomText from '../../../components/text/CustomText';
-import {ProgressBar} from '@react-native-community/progress-bar-android';
 import Header from '../../../components/header/Header';
 import RNFetchBlob from 'rn-fetch-blob';
 
@@ -34,7 +33,10 @@ const PdfViewer = ({navigation, route}) => {
   //   uri: `${BookDetails.pdf_book}`,
   //   cache: true,
   // };
-  const fileName = `${BookDetails?.title}.pdf`;
+  const url = BookDetails?.pdf_book;
+  const lastIndex = url.lastIndexOf('_edited_pdf');
+  const extractedString2 = url.substring(lastIndex - 10, lastIndex + 12);
+  const fileName = `${extractedString2}.pdf`;
   const cacheDir = RNFetchBlob.fs.dirs.CacheDir;
   const filePath = `${cacheDir}/${fileName}`;
   const source = {

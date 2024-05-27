@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, View, Text, Image, Alert} from 'react-native';
-
+import {ProgressBar} from 'rn-inkpad';
 import RNFetchBlob from 'rn-fetch-blob';
 import ButtonComp from '../../../components/button/Button';
 import Header from '../../../components/header/Header';
@@ -8,45 +8,84 @@ import {color} from '../../../constants/colors/colors';
 import {fp, hp, wp} from '../../../helpers/resDimension';
 import {typography} from '../../../assets/fonts/typography';
 import Snackbar from 'react-native-snackbar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PdfBooks = ({navigation, route}) => {
   const {BookDetails} = route.params;
+  console.log('🚀 ~ PdfBooks ~ BookDetails:', BookDetails);
 
   const [status, setStatus] = useState('download');
   const [progress, setProgress] = useState(0);
   const [filePath, setFilePath] = useState('');
-
-  const source = {
-    uri: `${BookDetails.pdf_book}`,
-  };
+  const [firstTimeChecked, setFirstTimeChecked] = useState(false);
 
   useEffect(() => {
     checkFileStatus();
-    console.log('BookDetails', BookDetails);
+    console.log(BookDetails?.pdf_book);
   }, [BookDetails]);
 
   const checkFileStatus = async () => {
-    // const fileName = `${BookDetails?.title}.pdf`;
-    const fileName = BookDetails?.pdf_book;
+    const pdfUrl = BookDetails?.pdf_book;
+    if (!pdfUrl) {
+      // Handle the case where pdfUrl is undefined or null
+      setStatus('download');
+      return;
+    }
+
+    const lastIndex = pdfUrl.lastIndexOf('_edited_pdf');
+    const extractedString2 = pdfUrl.substring(lastIndex - 10, lastIndex + 12);
+    const fileName = `${extractedString2}.pdf`;
     const cacheDir = RNFetchBlob.fs.dirs.CacheDir;
     const filePath = `${cacheDir}/${fileName}`;
 
     const fileExists = await RNFetchBlob.fs.exists(filePath);
-    if (fileExists) {
-      setStatus('read');
-      setFilePath(filePath);
+
+    // Retrieve the previous link from AsyncStorage
+    const previousLink = await AsyncStorage.getItem('previousPdfLink');
+
+    if (!firstTimeChecked) {
+      // First time checking, set status to 'download'
+      setStatus('download');
+      setFirstTimeChecked(true);
     } else {
-      // setStatus('download');
-      setStatus('update');
+      if (fileExists) {
+        if (previousLink !== pdfUrl) {
+          // If the file exists but the URL has changed, set status to 'update'
+          setStatus('update');
+        } else {
+          // If the file exists and the URL is the same, set status to 'read'
+          setStatus('read');
+        }
+      } else {
+        if (previousLink && previousLink !== pdfUrl) {
+          // If the file does not exist and the URL has changed, set status to 'update'
+          setStatus('update');
+        } else {
+          // If the file does not exist and there's no previous link or the URL is the same, set status to 'download'
+          setStatus('download');
+        }
+      }
     }
+
+    // Store the current link in AsyncStorage
+    await AsyncStorage.setItem('previousPdfLink', pdfUrl);
+
+    setFilePath(filePath);
   };
 
   const downloadPdf = async () => {
     setStatus('downloading');
     const pdfUrl = BookDetails?.pdf_book;
+    // const pdfUrl =
+    //   'https://sohojpora.s3.ap-south-1.amazonaws.com/edited_pdf_books/test%20book%20JI_1716532908_edited_pdf.pdf';
+
     console.log('🚀 ~ downloadPdf ~ pdfUrl:', pdfUrl);
     // const fileName = `${BookDetails?.title}.pdf`;
-    const fileName = BookDetails?.pdf_book;
+    // const fileName = BookDetails?.pdf_book;
+
+    const lastIndex = pdfUrl.lastIndexOf('_edited_pdf');
+    const extractedString2 = pdfUrl.substring(lastIndex - 10, lastIndex + 12);
+    const fileName = `${extractedString2}.pdf`;
     const cacheDir = RNFetchBlob.fs.dirs.CacheDir;
     const filePath = `${cacheDir}/${fileName}`;
 
@@ -88,13 +127,38 @@ const PdfBooks = ({navigation, route}) => {
       setStatus('download');
     }
   };
+  // useEffect(() => {
+  //   cleanCache();
+  // }, []);
+
+  // const cleanCache = async () => {
+  //   console.log('clean cache');
+  //   const fileName = `${BookDetails?.title}.pdf`;
+  //   const cacheDir = RNFetchBlob.fs.dirs.CacheDir;
+  //   const filePath = `${cacheDir}/${fileName}`;
+
+  //   try {
+  //     const fileExists = await RNFetchBlob.fs.exists(filePath);
+  //     if (fileExists) {
+  //       await RNFetchBlob.fs.unlink(filePath);
+  //       Alert.alert('File deleted', `File at ${filePath} has been deleted.`);
+  //       setFilePath('');
+  //       setStatus('download');
+  //       // setProgress(0);
+  //     } else {
+  //       Alert.alert('File not found', 'No file found in cache to delete.');
+  //     }
+  //   } catch (error) {
+  //     Alert.alert('Delete error', error.message);
+  //   }
+  // };
 
   const handleReadBook = () => {
     if (status === 'download') {
       downloadPdf();
     } else if (status === 'read') {
       navigation.navigate('PdfViewer', {BookDetails: BookDetails});
-    } else if (status == 'update') {
+    } else if (status === 'update') {
       downloadPdf();
     }
   };
@@ -116,6 +180,16 @@ const PdfBooks = ({navigation, route}) => {
           <Text style={styles.title}>{BookDetails?.title}</Text>
           <Text style={styles.description}>{BookDetails?.description}</Text>
           {status === 'downloading' && (
+            // <View style={styles.progressBar}>
+            //   <ProgressBar
+            //     rounded
+            //     value={Number(progress)} // Progress value should be a number
+            //     progressColor={color.PRIMARY_BLUE}
+            //     textColor={color.WHITE}
+            //     showPercent
+            //     backgroundColor={color?.PRIMARY_COVER}
+            //   />
+            // </View>
             <>
               <View style={styles.progressBar}>
                 <View style={[styles.progress, {width: `${progress}%`}]} />
