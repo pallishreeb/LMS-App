@@ -1,4 +1,12 @@
-import {FlatList, Image, StatusBar, StyleSheet, Text, View} from 'react-native';
+import {
+  FlatList,
+  Image,
+  ImageBackground,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {color} from '../../../constants/colors/colors';
@@ -118,42 +126,47 @@ const Courses = ({navigation}) => {
   function onRightPress() {
     navigation.navigate('Profile');
   }
+  function handleSearchTextChange(e) {
+    setSearchText(e);
+  }
   return (
     <View style={{flex: 1, backgroundColor: color.DIM_WHITE}}>
-      <KeyboardAwareScrollView>
-        <StatusBar
-          backgroundColor={color.PRIMARY_BLUE}
-          barStyle="light-content"
+      <ImageBackground
+        source={headerBg}
+        style={{height: hp(22), width: wp(100), alignSelf: 'center'}}
+        resizeMode="cover"
+        imageStyle={{
+          borderBottomLeftRadius: fp(3),
+          borderBottomRightRadius: fp(2),
+        }}>
+        {/* <View style={{marginTop: hp(4)}}> */}
+        <Header
+          title={'Courses'}
+          // onPress={onLeftPress}
+          onRightPress={onRightPress}
+          leftIcon={false}
         />
-        <Image
-          source={headerBg}
-          style={{height: hp(8), width: wp(100)}}
-          resizeMode="cover"
+        <View
+          style={{
+            borderTopWidth: fp(0.2),
+            borderColor: color.WHITE,
+            marginBottom: hp(1),
+          }}></View>
+        <CustomText
+          type="heading"
+          style={{marginLeft: wp(5), fontSize: fp(1.7), marginBottom: hp(2)}}>
+          Find a course want to learn
+        </CustomText>
+        <SearchTextInput
+          value={searchText}
+          onChangeText={handleSearchTextChange}
+          onSearch={handleSearch}
+          style={{color: color.DIM_BLACK, width: wp(80), height: hp(4)}}
         />
+        {/* </View> */}
+      </ImageBackground>
 
-        <View style={{position: 'absolute'}}>
-          <Header
-            title={'COURSES'}
-            leftIconName={'Menu'}
-            onRightPress={onRightPress}
-          />
-          <CustomText
-            type="heading"
-            style={{
-              marginLeft: wp(5),
-              fontSize: fp(1.7),
-              marginBottom: hp(2),
-            }}></CustomText>
-        </View>
-        <View style={{marginTop: hp(3)}}>
-          <SearchTextInput
-            value={searchText}
-            onChangeText={setSearchText}
-            onSearch={handleSearch}
-          />
-        </View>
-
-        {/* <View>
+      {/* <View>
           <View
             style={{
               paddingVertical: hp(3),
@@ -167,6 +180,7 @@ const Courses = ({navigation}) => {
             />
           </View>
         </View> */}
+      <KeyboardAwareScrollView>
         <View
           style={{
             backgroundColor: color.DIM_WHITE,

@@ -1,8 +1,10 @@
 import {
   FlatList,
   Image,
+  ImageBackground,
   Keyboard,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -23,6 +25,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useIcon} from '../../../assets/icons/useIcon';
 import ChatAsset from '../../../assets/ChatAssets';
 import Snackbar from 'react-native-snackbar';
+import CustomText from '../../../components/text/CustomText';
 
 const SenderMessage = () => {
   return (
@@ -126,11 +129,11 @@ const Chat = ({navigation}) => {
   }
 
   function onRightPress() {
-    navigation.navigate('Profile');
+    navigation.navigate('ProfileMenu');
   }
   return (
     <View style={{flex: 1}}>
-      <Image
+      {/* <Image
         source={headerBg}
         style={{height: hp(8), width: wp(100)}}
         resizeMode="cover"
@@ -142,7 +145,31 @@ const Chat = ({navigation}) => {
           onRightPress={onRightPress}
           onPress={onLeftPress}
         />
-      </View>
+      </View> */}
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
+      <ImageBackground
+        source={headerBg}
+        style={{height: hp(10), width: wp(100), alignSelf: 'center'}}
+        resizeMode="cover"
+        imageStyle={{
+          borderBottomLeftRadius: fp(3),
+          borderBottomRightRadius: fp(2),
+        }}>
+        {/* <View style={{marginTop: hp(4)}}> */}
+        <Header
+          title={'Chat'}
+          backgroundColor={color.PRIMARY_BLUE}
+          font={'regular'}
+          leftIconName={'leftArrow'}
+          onRightPress={onRightPress}
+        />
+        {/* </View> */}
+      </ImageBackground>
+
       <View style={{flex: 1}}>
         <FlatList data={messages} renderItem={ReceiverMessage} />
       </View>

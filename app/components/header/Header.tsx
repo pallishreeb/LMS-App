@@ -1,5 +1,5 @@
-import {Pressable, Text, TouchableOpacity, View} from 'react-native';
-import React, {useContext} from 'react';
+import {Pressable, StatusBar, Text, TouchableOpacity, View} from 'react-native';
+import React, {useContext, useMemo} from 'react';
 
 import {styles} from './styles';
 import {useNavigation} from '@react-navigation/native';
@@ -24,16 +24,13 @@ const Header = props => {
   return (
     <View style={[{backgroundColor: backgroundColor}, styles.wrapper]}>
       <View style={styles.innerWrapper}>
-        {
-          leftIcon ? (
-            <Pressable onPress={onPress} hitSlop={fp(3)}>
-              {leftIconName == 'leftArrow'
-                ? useIcon.ArrowLeft()
-                : useIcon.Menu()}
-            </Pressable>
-          ) : null
-          // <View style={styles.placeHolderView} />
-        }
+        {leftIcon ? (
+          <Pressable onPress={onPress} hitSlop={fp(3)}>
+            {leftIconName == 'leftArrow' ? useIcon.ArrowLeft() : useIcon.Menu()}
+          </Pressable>
+        ) : (
+          <View style={styles.placeHolderView} />
+        )}
         <Text
           style={[
             [styles.heading],
@@ -50,7 +47,9 @@ const Header = props => {
           <TouchableOpacity onPress={onRightPress}>
             {useIcon.UserIcon()}
           </TouchableOpacity>
-        ) : null}
+        ) : (
+          <View style={styles.placeHolderView} />
+        )}
       </View>
     </View>
   );

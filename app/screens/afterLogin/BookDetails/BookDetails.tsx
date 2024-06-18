@@ -26,6 +26,11 @@ const BookDetails = ({navigation, route}) => {
   return (
     <View style={{flex: 1}}>
       <KeyboardAwareScrollView>
+        <StatusBar
+          translucent
+          backgroundColor={color.PRIMARY_BLUE}
+          barStyle="light-content"
+        />
         <Header
           title={'About Book'}
           backgroundColor={color.PRIMARY_BLUE}
@@ -223,14 +228,13 @@ const BookDetails = ({navigation, route}) => {
               borderTopWidth: fp(0.25),
               borderTopColor: '#F2F2F2',
               flexDirection: 'row',
-              justifyContent: 'space-between',
+              justifyContent: 'center',
               alignItems: 'center',
-
               paddingHorizontal: wp(5),
               paddingVertical: hp(1),
               height: hp(10),
             }}>
-            <CustomText
+            {/* <CustomText
               type={'typeRegular'}
               style={{
                 fontFamily: typography.Inter_SemiBold,
@@ -242,14 +246,17 @@ const BookDetails = ({navigation, route}) => {
               }}>
               {' '}
               ৳ {BookDetails?.price}
-            </CustomText>
-            <ButtonComp
-              marginTop={0}
-              title="Buy Now"
-              onPress={() => {
-                setShowPaymentAlert(true);
-              }}
-            />
+            </CustomText> */}
+            <View style={{width: wp(70)}}>
+              <ButtonComp
+                marginTop={0}
+                title="Read Book"
+                onPress={() => {
+                  navigation.navigate('PdfBooks', {BookDetails: BookDetails});
+                  // setShowPaymentAlert(true);
+                }}
+              />
+            </View>
           </View>
         </View>
         <Modal
@@ -263,7 +270,7 @@ const BookDetails = ({navigation, route}) => {
             img={PaymentAlertIllus}
             onPress={() => {
               setShowPaymentAlert(false);
-              navigation.navigate('Payment', {BookDetails: BookDetails});
+              navigation.navigate('PdfBooks', {BookDetails: BookDetails});
             }}
             onClosePress={() => {
               setShowPaymentAlert(false);

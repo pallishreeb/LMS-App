@@ -2,6 +2,7 @@ import {
   Alert,
   BackHandler,
   Image,
+  ImageBackground,
   Pressable,
   ScrollView,
   StatusBar,
@@ -24,7 +25,6 @@ import {apiClient} from '../../../helpers/apiClient';
 import {endpoints} from '../../../constants/colors/endpoints';
 import Snackbar from 'react-native-snackbar';
 import {FlatList} from 'react-native-gesture-handler';
-import {Slider} from '@miblanchard/react-native-slider';
 import BitMovinVideoPlayerComp from '../../../components/bitMovinVideoComp/BitMovinVideoPlayer';
 
 const Home = ({navigation}) => {
@@ -130,7 +130,7 @@ const Home = ({navigation}) => {
             }}
             style={{
               height: hp(22),
-              width: wp(35),
+              width: wp(39.5),
               marginTop: hp(0.5),
               borderRadius: fp(1),
               alignSelf: 'center',
@@ -175,10 +175,10 @@ const Home = ({navigation}) => {
     );
   };
   function onLeftPress() {
-    navigation.openDrawer();
+    // navigation.openDrawer();
   }
   function onRightPress() {
-    navigation.navigate('Profile');
+    navigation.navigate('ProfileMenu');
     // navigation.navigate('Chat');
   }
 
@@ -272,26 +272,35 @@ const Home = ({navigation}) => {
 
   return (
     <View style={{flex: 1, backgroundColor: color.WHITE}}>
-      <StatusBar
+      {/* <StatusBar
         backgroundColor={color.PRIMARY_BLUE}
         barStyle="light-content"
+      /> */}
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
       />
-      <Image
+      <ImageBackground
         source={headerBg}
-        style={{height: hp(21), width: wp(100)}}
+        style={{height: hp(22), width: wp(100), alignSelf: 'center'}}
         resizeMode="cover"
-      />
-      <View style={{position: 'absolute'}}>
+        imageStyle={{
+          borderBottomLeftRadius: fp(3),
+          borderBottomRightRadius: fp(2),
+        }}>
+        {/* <View style={{marginTop: hp(4)}}> */}
         <Header
           title={'SOHOJ PORA'}
-          onPress={onLeftPress}
+          // onPress={onLeftPress}
           onRightPress={onRightPress}
+          leftIcon={false}
         />
         <View
           style={{
             borderTopWidth: fp(0.2),
             borderColor: color.WHITE,
-            marginBottom: hp(2),
+            marginBottom: hp(1),
           }}></View>
         <CustomText
           type="heading"
@@ -302,9 +311,11 @@ const Home = ({navigation}) => {
           value={searchText}
           onChangeText={handleSearchTextChange}
           onSearch={handleSearch}
-          style={{color: color.DIM_BLACK, width: wp(80)}}
+          style={{color: color.DIM_BLACK, width: wp(80), height: hp(4)}}
         />
-      </View>
+        {/* </View> */}
+      </ImageBackground>
+
       {/* <View style={{marginTop: hp(2)}}>
       <RecommendedList recommendData={recommendImgList} />
     </View> */}

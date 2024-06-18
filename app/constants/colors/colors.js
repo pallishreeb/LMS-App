@@ -8,3 +8,15 @@ export const color = {
   GREY: '#464646',
   DIM_BLACK: '#434343',
 };
+export const colorArray = [
+  {rgb: 'rgb(54, 75, 159)', rgba: 'rgba(54, 75, 159, 0.3)'},
+  {rgb: 'rgb(54, 75, 159)', rgba: 'rgba(54, 75, 159, 0.3)'},
+  {rgb: 'rgb(54, 75, 159)', rgba: 'rgba(54, 75, 159, 0.3)'},
+  {rgb: 'rgb(54, 75, 159)', rgba: 'rgba(54, 75, 159, 0.3)'},
+  {rgb: 'rgb(54, 75, 159)', rgba: 'rgba(54, 75, 159, 0.3)'},
+  {rgb: 'rgb(54, 75, 159)', rgba: 'rgba(54, 75, 159, 0.3)'},
+  {rgb: 'rgb(54, 75, 159)', rgba: 'rgba(54, 75, 159, 0.3)'},
+  {rgb: 'rgb(54, 75, 159)', rgba: 'rgba(54, 75, 159, 0.3)'},
+  {rgb: 'rgb(54, 75, 159)', rgba: 'rgba(54, 75, 159, 0.3)'},
+  {rgb: 'rgb(54, 75, 159)', rgba: 'rgba(54, 75, 159, 0.3)'},
+];

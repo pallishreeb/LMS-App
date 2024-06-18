@@ -9,13 +9,19 @@ import {store} from './app/redux/Store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MyOrders from './app/screens/afterLogin/MyOrders/MyOrders';
 import {MyDrawer} from './app/helpers/DrawerNavigation/DrawerNavigation';
+import Orientation from 'react-native-orientation-locker';
 export default function App() {
   useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();
     }, 3000);
   }, []);
-
+  useEffect(() => {
+    Orientation.lockToPortrait; // Lock the app to landscape orientation
+    return () => {
+      Orientation.unlockAllOrientations(); // Ensure orientation is unlocked when component unmounts
+    };
+  }, []);
   const [isLogged, setIsLogged] = React.useState('');
   const [token, setToken] = React.useState('');
   const [isloading, setIsLoading] = React.useState(false);
@@ -37,7 +43,7 @@ export default function App() {
   return (
     <Provider store={store}>
       <NavigationContainer>
-        {token ? <MyDrawer /> : <BeforeLoginStack />}
+        {token ? <AfterLoginStack /> : <BeforeLoginStack />}
       </NavigationContainer>
     </Provider>
   );

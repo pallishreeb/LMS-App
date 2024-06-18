@@ -41,8 +41,10 @@ const PlayButton = require('./PlayButton.png');
 const OpenBook = require('./OpenBook.png');
 const Download = require('./Download.png');
 const Update = require('./Update.png');
+const FullBg = require('./FullBg.png');
 
 export {
+  FullBg,
   Update,
   Download,
   chatIcon,

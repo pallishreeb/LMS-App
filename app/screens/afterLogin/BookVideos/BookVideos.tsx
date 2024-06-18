@@ -12,6 +12,8 @@ import {
   Alert,
   StatusBar,
   PermissionsAndroid,
+  BackHandler,
+  ScrollView,
 } from 'react-native';
 import axios from 'axios';
 import {responsiveHeight} from 'react-native-responsive-dimensions';
@@ -39,7 +41,7 @@ import DislikeButton from '../../../components/LikeButton/DislikeButton';
 import CommentButton from '../../../components/LikeButton/CommentButton';
 import {useNavigationState} from '@react-navigation/native';
 const BookVideos: React.FC = ({navigation, route}) => {
-  const {BookDetails} = route.params;
+  const {BookDetails, VideoUri} = route.params;
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [commentText, SetCommentText] = useState('');
@@ -68,9 +70,20 @@ const BookVideos: React.FC = ({navigation, route}) => {
 
   const [userId, setUserId] = useState('');
 
-  useEffect(() => {
-    handleGetBookVideos();
-  }, []);
+  useEffect(
+    () => {
+      handleGetBookVideos();
+    },
+    [
+      // handleCommentDelete,
+      // // handleCommentEdit,
+      // // handleCommentReply,
+      // handleSendComment,
+      // handleSendCommentReply,
+      // handleSendEditedComment,
+      // handleSendEditedReply,
+    ],
+  );
 
   const handleGetBookVideos = async () => {
     const user_id = await AsyncStorage.getItem('user_id');
@@ -79,7 +92,7 @@ const BookVideos: React.FC = ({navigation, route}) => {
       setIsLoading(true);
       // const response = await apiClient.get(`books/${BookDetails.id}/videos`);
       const response = await apiClient.post(`/videos/details`, {
-        video_url: BookDetails,
+        video_url: VideoUri,
       });
 
       if (response.status === 200) {
@@ -275,9 +288,14 @@ const BookVideos: React.FC = ({navigation, route}) => {
         setImageResponse({});
         setImageResponseUI({});
         setShowCommentAlert(true);
-        setTimeout(() => {
-          setShowCommentAlert(false);
-        }, 3000);
+        Snackbar.show({
+          text: 'Your comment successfully uploaded',
+          duration: 2000,
+          backgroundColor: color.PRIMARY_BLUE,
+        });
+        // setTimeout(() => {
+        //   setShowCommentAlert(false);
+        // }, 3000);
       }
     } catch (error) {
       console.log('🚀 ~ handleSendComment ~ error:', error);
@@ -477,6 +495,7 @@ const BookVideos: React.FC = ({navigation, route}) => {
       console.log(response.status, 'response.status');
       if (response.status === 200) {
         handleGetCommentsData(bookVideosRes.id);
+        handleGetBookVideos();
         setIsLoading(false);
         Snackbar.show({
           text: response?.data?.message,
@@ -918,14 +937,21 @@ const BookVideos: React.FC = ({navigation, route}) => {
   // function handleIsLandscapeCb(params) {
 
   // }
-  const routes = useNavigationState(state => state.routes);
-  console.log(routes);
-  function onLeftPress(params: type) {
-    navigation.goBack();
-    // navigation.navigate('PdfBooks');
 
+  function onLeftPress() {
+    navigation.goBack();
+    // navigation.navigate('PdfViewer', {BookDetails: BookDetails});
     setPause(true);
+    return true;
   }
+
+  // useEffect(() => {
+  //   BackHandler.addEventListener('hardwareBackPress', onLeftPress);
+
+  //   return () =>
+  //     BackHandler.removeEventListener('hardwareBackPress', onLeftPress);
+  // }, []);
+
   const [pause, setPause] = useState(true);
   function handleCommentPress() {}
 
@@ -947,10 +973,7 @@ const BookVideos: React.FC = ({navigation, route}) => {
         backgroundColor={color.PRIMARY_BLUE}
         barStyle="light-content"
       />
-      <VideoPlayerEx
-        uri={BookDetails}
-        handleIsLandscapeCb={handleIsLandscapeCb}
-      />
+      <VideoPlayerEx uri={VideoUri} handleIsLandscapeCb={handleIsLandscapeCb} />
       {/* <View style={{flex: 1}}> */}
       <View style={{marginLeft: wp(4)}}>
         <CustomText
@@ -983,7 +1006,8 @@ const BookVideos: React.FC = ({navigation, route}) => {
           onPress={handleDislikePress}
         />
       </View>
-      {/* {likePressed == && (
+      <ScrollView>
+        {/* {likePressed == && (
           <CustomText
             type={'typeRegular'}
             style={{
@@ -996,121 +1020,136 @@ const BookVideos: React.FC = ({navigation, route}) => {
             Shubham liked this video
           </CustomText>
         )} */}
-      <View
-        style={{
-          marginBottom: hp(1),
-          // backgroundColor: 'green',
-        }}>
         <View
           style={{
-            borderWidth: fp(0.1),
-            borderColor: '#F7F7F7',
-            marginTop: hp(2),
-          }}
-        />
-
-        <CommentInput
-          refInput={refInput}
-          commentText={commentText}
-          onChangeComment={onChangeComment}
-          handleSendComment={
-            editCommentFlow ? handleSendEditedComment : handleSendComment
-          }
-          handleAddAttachment={handleAddAttachment}
-          uri={imageResponseUI?.uri ? imageResponseUI?.uri : null}
-          isLandscape={isLandscape}
-        />
-      </View>
-
-      {/* //?comment section */}
-      <View style={{flex: 1, paddingBottom: hp(2), backgroundColor: '#F7F7F7'}}>
-        <FlatList data={commentsData} renderItem={renderComments} />
-      </View>
-      {/* </View> */}
-
-      {showAddPhotoModal ? (
-        <Pressable
-          onPress={() => setShowAddPhotoModal(false)}
-          style={{
-            position: 'absolute',
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: hp(100),
-            width: wp(100),
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-            // backgroundColor: 'red',
+            marginBottom: hp(1),
+            // backgroundColor: 'green',
           }}>
           <View
             style={{
-              height: hp(28),
-              width: wp(75),
-              borderRadius: fp(2),
-              position: 'absolute',
-              backgroundColor: 'white',
-              // bottom: 0,
-              top: hp(20),
-              marginHorizontal: wp(10),
-              alignSelf: 'center',
-              // left: 0,
-              // right: 0,
-            }}>
-            <CustomText
-              type={'typeRegular'}
-              style={{
-                fontFamily: typography.Inter_Bold,
-                fontSize: fp(2.2),
-                color: color.PRIMARY_BLUE,
-                // marginTop: hp(1),
-                padding: fp(2),
-              }}>
-              Add Photo
-            </CustomText>
-            <View style={{borderTopWidth: fp(0.2), borderColor: color.GREY}} />
-            <CustomText
-              type={'typeRegular'}
-              onPress={handleOpenCamera}
-              style={{
-                fontFamily: typography.Inter_Medium,
-                fontSize: fp(2),
-                color: '#555555',
-                // marginTop: hp(1),
-                padding: fp(2),
-              }}>
-              Camera
-            </CustomText>
-            <View style={{borderTopWidth: fp(0.1), borderColor: color.GREY}} />
-            <CustomText
-              onPress={handleOpenGallery}
-              type={'typeRegular'}
-              style={{
-                fontFamily: typography.Inter_Medium,
-                fontSize: fp(2),
-                color: '#555555',
-                // marginTop: hp(1),
-                padding: fp(2),
-              }}>
-              Gallery
-            </CustomText>
-            <View style={{borderTopWidth: fp(0.1), borderColor: color.GREY}} />
-            <CustomText
-              type={'typeRegular'}
-              style={{
-                fontFamily: typography.Inter_Medium,
-                fontSize: fp(2),
-                color: '#555555',
-                // marginTop: hp(1),
-                padding: fp(2),
-              }}>
-              Close
-            </CustomText>
-          </View>
-        </Pressable>
-      ) : null}
+              borderWidth: fp(0.1),
+              borderColor: '#F7F7F7',
+              marginTop: hp(2),
+            }}
+          />
 
-      {showCommentAlert && (
-        <CommentAlert handleClosePress={() => setShowCommentAlert(false)} />
-      )}
+          <CommentInput
+            refInput={refInput}
+            commentText={commentText}
+            onChangeComment={onChangeComment}
+            handleSendComment={
+              editCommentFlow ? handleSendEditedComment : handleSendComment
+            }
+            handleAddAttachment={handleAddAttachment}
+            uri={imageResponseUI?.uri ? imageResponseUI?.uri : null}
+            isLandscape={isLandscape}
+          />
+        </View>
+
+        {/* //?comment section */}
+        <View
+          style={{flex: 1, paddingBottom: hp(2), backgroundColor: '#F7F7F7'}}>
+          <FlatList data={commentsData} renderItem={renderComments} />
+        </View>
+        {/* </View> */}
+
+        {showAddPhotoModal ? (
+          <Pressable
+            onPress={() => setShowAddPhotoModal(false)}
+            style={{
+              position: 'absolute',
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: hp(100),
+              width: wp(100),
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              // backgroundColor: 'red',
+            }}>
+            <View
+              style={{
+                height: hp(28),
+                width: wp(75),
+                borderRadius: fp(2),
+                position: 'absolute',
+                backgroundColor: 'white',
+                // bottom: 0,
+                top: hp(20),
+                marginHorizontal: wp(10),
+                alignSelf: 'center',
+                // left: 0,
+                // right: 0,
+              }}>
+              <CustomText
+                type={'typeRegular'}
+                style={{
+                  fontFamily: typography.Inter_Bold,
+                  fontSize: fp(2.2),
+                  color: color.PRIMARY_BLUE,
+                  // marginTop: hp(1),
+                  padding: fp(2),
+                }}>
+                Add Photo
+              </CustomText>
+              <View
+                style={{borderTopWidth: fp(0.2), borderColor: color.GREY}}
+              />
+              <CustomText
+                type={'typeRegular'}
+                onPress={handleOpenCamera}
+                style={{
+                  fontFamily: typography.Inter_Medium,
+                  fontSize: fp(2),
+                  color: '#555555',
+                  // marginTop: hp(1),
+                  padding: fp(2),
+                }}>
+                Camera
+              </CustomText>
+              <View
+                style={{borderTopWidth: fp(0.1), borderColor: color.GREY}}
+              />
+              <CustomText
+                onPress={handleOpenGallery}
+                type={'typeRegular'}
+                style={{
+                  fontFamily: typography.Inter_Medium,
+                  fontSize: fp(2),
+                  color: '#555555',
+                  // marginTop: hp(1),
+                  padding: fp(2),
+                }}>
+                Gallery
+              </CustomText>
+              <View
+                style={{borderTopWidth: fp(0.1), borderColor: color.GREY}}
+              />
+              <CustomText
+                type={'typeRegular'}
+                style={{
+                  fontFamily: typography.Inter_Medium,
+                  fontSize: fp(2),
+                  color: '#555555',
+                  // marginTop: hp(1),
+                  padding: fp(2),
+                }}>
+                Close
+              </CustomText>
+            </View>
+          </Pressable>
+        ) : null}
+
+        {/* {
+          showCommentAlert &&
+            Snackbar.show({
+              text: 'Your comment successfully uploaded',
+              duration: 2000,
+              backgroundColor: color.PRIMARY_BLUE,
+            })
+          // ;
+          //     <CommentAlert handleClosePress={() => setShowCommentAlert(false)} />
+        } */}
+      </ScrollView>
       {isLoading && (
         <ActivityIndicator
           size="large"

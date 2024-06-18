@@ -141,7 +141,7 @@ const Login = ({navigation}) => {
           'user_id',
           response?.data?.user?.id.toString(),
         );
-        navigation.navigate('MyDrawer');
+        navigation.navigate('Home');
       }
     } catch (error) {
       console.log('inside catch', error.message);
@@ -265,8 +265,15 @@ const Login = ({navigation}) => {
     }
   };
   async function onAlertOK(params: type) {
-    navigation.navigate('MyDrawer');
+    navigation.navigate('Home');
     await AsyncStorage.setItem('loginType', 'mannual');
+  }
+  function onOtpOkPress(response) {
+    navigation.navigate('Otp', {
+      phoneNo: response.data.data.mobile_number,
+      email: response.data.data.email,
+      previousRoute: 'login',
+    });
   }
   const handleLogin = async () => {
     try {
@@ -301,29 +308,10 @@ const Login = ({navigation}) => {
           Alert.alert('Info', `Use ${response.data.data.otp} as your OTP`, [
             {
               text: 'OK',
-              onPress: () =>
-                navigation.navigate('Otp', {
-                  phoneNo: response.data.data.mobile_number,
-                  email: response.data.data.email,
-                  previousRoute: 'login',
-                }),
+              onPress: () => onOtpOkPress(response),
             },
           ]);
         }
-
-        // Alert.alert('Information', `${response.data.message}`, [
-        //   {
-        //     text: 'Ok',
-        //     onPress: () =>
-        //       navigation.navigate('Otp', {
-        //         email: email,
-        //         phoneNo: phoneNo,
-        //         otp: response?.data?.otp,
-        //       }),
-        //     style: 'default',
-        //   },
-        // ]);
-        // console.log('🚀 ~ file: Flow.tsx:120 ~ Flow ~ token:', token);
       }
     } catch (error) {
       console.log('inside catch', error.message);
@@ -347,12 +335,16 @@ const Login = ({navigation}) => {
   return (
     <View style={styles.mainContainer}>
       <KeyboardAwareScrollView>
-        <StatusBar backgroundColor={color.WHITE} barStyle="light-content" />
+        <StatusBar
+          translucent
+          backgroundColor="transparent"
+          barStyle="light-content"
+        />
         <View style={styles.illustrationContainer}>
           <Image source={login_illustration} style={styles.illustrationImg} />
         </View>
         <View style={styles.headingContainer}>
-          <CustomText type={'heading'}>Login</CustomText>
+          <CustomText type={'heading'}>Sign in</CustomText>
           <CustomText type={'textRegular'}>
             Please sign in to continue.
           </CustomText>
@@ -399,21 +391,38 @@ const Login = ({navigation}) => {
           <CustomText type={'textRegular'}>Remember me</CustomText>
         </View>
         <View style={styles.btnContainer}>
-          <MainButton _onPress={handleLogin} _title="Login" />
+          <MainButton _onPress={handleLogin} _title="Sign in" />
         </View>
-        <View style={{alignSelf: 'center', marginTop: hp(2)}}>
-          <Text style={styles.orText}>Or</Text>
+        <View
+          style={{alignSelf: 'center', marginTop: hp(2), flexDirection: 'row'}}>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: 'rgba(248, 248, 248, 0.3)',
+              width: wp(28),
+              alignSelf: 'center',
+            }}
+          />
+          <Text style={styles.orText}>Or Sign in with</Text>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: 'rgba(248, 248, 248, 0.3)',
+              width: wp(28),
+              alignSelf: 'center',
+            }}
+          />
         </View>
 
         <TouchableOpacity style={styles.button} onPress={onGoogleButtonPress}>
-          <Text style={styles.text}>Continue with Google</Text>
+          {/* <Text style={styles.text}>Continue with Google</Text> */}
           <Image
             source={DrawerIcons.GoogleIcon}
             style={{
-              height: fp(2),
-              width: fp(2),
+              height: fp(3.4),
+              width: fp(3.4),
               alignSelf: 'center',
-              marginLeft: wp(2),
+              // marginLeft: wp(2),
               // marginTop: hp(2),
             }}
           />

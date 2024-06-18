@@ -110,9 +110,10 @@ export const useIcon = {
   CloseIcon: () => (
     <AntDesign name="closecircleo" size={fp(3.2)} color={color.PRIMARY_BLUE} />
   ),
-  RightArrowShort: () => (
-    <AntDesign name="right" size={fp(3.4)} color="black" />
-  ),
+  RightArrowShort: size => <AntDesign name="right" size={size} color="black" />,
+  // RightArrowShort: (size) => (
+  //   <AntDesign name="right" size={fp(3.4)} color="black" />
+  // ),
   ArrowLeft: () => (
     <AntDesign name="arrowleft" size={fp(3.2)} color={color.WHITE} />
   ),

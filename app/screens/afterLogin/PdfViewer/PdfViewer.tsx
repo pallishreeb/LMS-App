@@ -67,7 +67,11 @@ const PdfViewer = ({navigation, route}) => {
           console.log(error);
         }}
         onPressLink={uri => {
-          navigation.navigate('BookVideos', {BookDetails: uri});
+          // navigation.navigate('BookVideos', {BookDetails: uri});
+          navigation.navigate('BookVideos', {
+            BookDetails: BookDetails,
+            VideoUri: uri,
+          });
           console.log(`Link pressed: ${uri}`);
         }}
         style={styles.pdf}

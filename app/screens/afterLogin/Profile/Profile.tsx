@@ -2,10 +2,12 @@ import {
   Alert,
   Dimensions,
   Image,
+  ImageBackground,
   PermissionsAndroid,
   Platform,
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   View,
@@ -16,7 +18,7 @@ import Pdf from 'react-native-pdf';
 import Header from '../../../components/header/Header';
 import {color} from '../../../constants/colors/colors';
 import {fp, hp, wp} from '../../../helpers/resDimension';
-import {CameraIcon, DummyProfImg} from '../../../assets/images';
+import {CameraIcon, DummyProfImg, headerBg} from '../../../assets/images';
 import {ProfileInput} from '../../../components/input/ProfileInput';
 import {typography} from '../../../assets/fonts/typography';
 import ButtonComp from '../../../components/button/Button';
@@ -270,7 +272,7 @@ const Profile = ({navigation}) => {
           navigation.goBack();
         }
       } catch (error) {
-        console.log('🚀 ~ handleSendComment ~ error:', error);
+        console.log('🚀 ~ handleUpdateProfile ~ error:', error);
         Snackbar.show({
           text: response?.data?.message,
           duration: 2000,
@@ -291,16 +293,38 @@ const Profile = ({navigation}) => {
       });
     }
   }
-
+  function onLeftPress() {
+    navigation.goBack();
+  }
   return (
     <View style={styles.container}>
       <ScrollView>
-        <Header
-          title={'Profile'}
-          backgroundColor={color.PRIMARY_BLUE}
-          font={'regular'}
-          leftIconName={'menuIcon'}
+        <StatusBar
+          translucent
+          backgroundColor="transparent"
+          barStyle="light-content"
         />
+        <ImageBackground
+          source={headerBg}
+          style={{height: hp(10), width: wp(100), alignSelf: 'center'}}
+          resizeMode="cover"
+          imageStyle={
+            {
+              // borderBottomLeftRadius: fp(3),
+              // borderBottomRightRadius: fp(2),
+            }
+          }>
+          {/* <View style={{marginTop: hp(4)}}> */}
+          <Header
+            title={'Edit Profile'}
+            rightIcon={false}
+            onPress={onLeftPress}
+            leftIconName="leftArrow"
+            // onRightPress={onRightPress}
+          />
+
+          {/* </View> */}
+        </ImageBackground>
         <View
           style={{
             alignSelf: 'center',
@@ -319,6 +343,7 @@ const Profile = ({navigation}) => {
               }}
             />
           </Pressable>
+
           {Object.keys(imageResponse).length > 0 ? (
             <Image
               source={{uri: imageResponse?.uri}}

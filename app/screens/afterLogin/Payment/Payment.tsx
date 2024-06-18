@@ -19,6 +19,7 @@ import {OrderAlertIllus} from '../../../assets/images';
 
 const Payment = ({navigation, route}) => {
   const {BookDetails} = route.params;
+  console.log('🚀 ~ Payment ~ BookDetails:', BookDetails);
   const [checked, setChecked] = React.useState('first');
   const [checkboxState, setCheckboxState] = React.useState(false);
   const [showOrderAlert, setShowOrderAlert] = React.useState(false);

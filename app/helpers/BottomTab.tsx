@@ -22,7 +22,8 @@ import Home from '../screens/afterLogin/Home/Home';
 import Courses from '../screens/afterLogin/Courses/Courses';
 import Profile from '../screens/afterLogin/Profile/Profile';
 import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
-import Chat from '../screens/afterLogin/Chat/Chat';
+import ProfileMenu from '../screens/afterLogin/Profile/ProfileMenu/ProfileMenu';
+import BookBundles from '../screens/afterLogin/Books/BookBundles';
 
 const Tab = createBottomTabNavigator();
 const BottomTab = () => {
@@ -53,14 +54,14 @@ const BottomTab = () => {
           // Determine which icon to show based on the route name
           if (route.name === 'Home') {
             iconSource = focused ? dashboardActive : dashboard; // Change the icon based on focus
-          } else if (route.name === 'Books') {
+          } else if (route.name === 'BookBundles') {
             iconSource = focused ? booksActive : books;
           } else if (route.name === 'Courses') {
             iconSource = focused ? coursesActive : courses;
-          } else if (route.name === 'Profile') {
+          } else if (route.name === 'ProfileMenu') {
             iconSource = focused ? profileActive : profile;
-          } else if (route.name === 'Chat') {
-            iconSource = focused ? chatIconActive : chatIcon;
+            // } else if (route.name === 'Chat') {
+            //   iconSource = focused ? chatIconActive : chatIcon;
           }
 
           // Return the icon component
@@ -85,7 +86,11 @@ const BottomTab = () => {
           return (
             <Text
               style={[{fontSize: fp(1.4), paddingBottom: hp(1)}, labelStyle]}>
-              {route.name}
+              {route.name == 'ProfileMenu'
+                ? 'Me'
+                : route.name == 'BookBundles'
+                ? 'Books'
+                : route.name}
             </Text>
           );
         },
@@ -98,8 +103,8 @@ const BottomTab = () => {
         }}
       />
       <Tab.Screen
-        name="Books"
-        component={Books}
+        name="BookBundles"
+        component={BookBundles}
         options={{
           headerShown: false,
         }}
@@ -112,19 +117,19 @@ const BottomTab = () => {
         }}
       />
       <Tab.Screen
-        name="Profile"
-        component={Profile}
+        name="ProfileMenu"
+        component={ProfileMenu}
         options={{
           headerShown: false,
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Chat"
         component={Chat}
         options={{
           headerShown: false,
         }}
-      />
+      /> */}
     </Tab.Navigator>
   );
 };

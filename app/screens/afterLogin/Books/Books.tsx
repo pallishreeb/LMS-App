@@ -1,8 +1,21 @@
 import {useEffect, useState} from 'react';
-import {Image, Pressable, StatusBar, Text, View} from 'react-native';
+import {
+  Alert,
+  Image,
+  ImageBackground,
+  Modal,
+  Pressable,
+  StatusBar,
+  Text,
+  View,
+} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {typography} from '../../../assets/fonts/typography';
-import {BookCoverImg, headerBg} from '../../../assets/images/index';
+import {
+  BookCoverImg,
+  PaymentAlertIllus,
+  headerBg,
+} from '../../../assets/images/index';
 import Header from '../../../components/header/Header';
 import SearchTextInput from '../../../components/searchTextInput/SearchTextInput';
 import CustomText from '../../../components/text/CustomText';
@@ -12,8 +25,12 @@ import {endpoints} from '../../../constants/colors/endpoints';
 import {apiClient} from '../../../helpers/apiClient';
 import Snackbar from 'react-native-snackbar';
 import {FlatList} from 'react-native-gesture-handler';
+import ButtonComp from '../../../components/button/Button';
+import CustomAlert from '../../../components/alerts/CustomAlert';
 
-const Books = ({navigation}) => {
+const Books = ({route, navigation}) => {
+  const {category_data} = route.params;
+  console.log('🚀 ~ Books ~ category_data:', category_data);
   const [searchText, setSearchText] = useState('');
   const [bookDetails, setBookDetails] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,18 +39,20 @@ const Books = ({navigation}) => {
     console.log('Searching for:', searchText);
   };
 
-  const handleGetBooks = async () => {
+  const handleGetBooksByCategoryId = async () => {
     try {
       setIsLoading(true);
-      const response = await apiClient.get(`${endpoints.GET_BOOKS}`);
+      const response = await apiClient.get(
+        `${endpoints.GET_BOOKS_BY_CATEGORY_ID}${category_data.id}`,
+      );
       console.log(response.status, 'response.status');
       if (response.status === 200) {
         console.log(
-          '🚀 ~ handleGetBooks ~ response?.data?.books:',
-          response?.data?.books,
+          '🚀 ~ handleGetBooksByCategoryId ~ response?.data?.books:',
+          response?.data,
         );
 
-        setBookDetails(response?.data?.books);
+        setBookDetails(response?.data);
         setIsLoading(false);
       }
     } catch (error) {
@@ -48,18 +67,26 @@ const Books = ({navigation}) => {
       setIsLoading(false);
     }
   };
-  useEffect(() => {
-    handleGetBooks();
-  }, []);
+  const [showPaymentAlert, setShowPaymentAlert] = useState(false);
 
+  useEffect(() => {
+    handleGetBooksByCategoryId();
+  }, []);
+  function navigateToBookDetails(item) {
+    Alert.alert(
+      'Information',
+      'You need to buy the class bundle in order to access and read the book.',
+      [{text: 'OK'}],
+    );
+    // navigation.navigate('BookDetails', {BookDetails: item});
+  }
   const renderBooks = ({item}) => {
     return (
-      <Pressable
-        onPress={() => navigation.navigate('BookDetails', {BookDetails: item})}>
+      <Pressable onPress={item => navigateToBookDetails(item)}>
         <View
           style={{
             backgroundColor: color.WHITE,
-            height: hp(30.5),
+            height: hp(28),
             width: wp(45),
             borderRadius: fp(1),
             marginRight: wp(3),
@@ -68,7 +95,7 @@ const Books = ({navigation}) => {
             source={{uri: `${item.cover_pic}`}}
             style={{
               height: hp(22),
-              width: wp(38),
+              width: wp(43.4),
               marginTop: hp(0.5),
               borderRadius: fp(1),
               alignSelf: 'center',
@@ -79,7 +106,7 @@ const Books = ({navigation}) => {
               type={'textRegular'}
               style={{
                 fontFamily: typography.Inter_Medium,
-                fontSize: fp(1.4),
+                fontSize: fp(1.6),
                 color: '#333333',
                 marginTop: hp(0.5),
               }}>
@@ -91,13 +118,13 @@ const Books = ({navigation}) => {
               style={{
                 fontFamily: typography.Inter_Medium,
                 color: '#A0A0A0',
-                fontSize: fp(1.2),
+                fontSize: fp(1.4),
                 marginLeft: wp(0.5),
               }}>
               Author: Sohoj Pora
             </CustomText>
             {/* )} */}
-            <CustomText
+            {/* <CustomText
               type={'textRegular'}
               style={{
                 fontFamily: typography.Inter_SemiBold,
@@ -106,44 +133,62 @@ const Books = ({navigation}) => {
                 fontSize: fp(1.65),
               }}>
               ৳ {item?.price}
-            </CustomText>
+            </CustomText> */}
           </View>
         </View>
       </Pressable>
     );
   };
+  function onRightPress() {
+    navigation.navigate('ProfileMenu');
+    // navigation.navigate('Chat');
+  }
+  function handleSearchTextChange(e) {
+    setSearchText(e);
+  }
+
   return (
     <View style={{flex: 1}}>
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
+      <ImageBackground
+        source={headerBg}
+        style={{height: hp(22), width: wp(100), alignSelf: 'center'}}
+        resizeMode="cover"
+        imageStyle={{
+          borderBottomLeftRadius: fp(3),
+          borderBottomRightRadius: fp(2),
+        }}>
+        {/* <View style={{marginTop: hp(4)}}> */}
+        <Header
+          title={'Books'}
+          // onPress={onLeftPress}
+          onRightPress={onRightPress}
+          leftIcon={false}
+        />
+        <View
+          style={{
+            borderTopWidth: fp(0.2),
+            borderColor: color.WHITE,
+            marginBottom: hp(1),
+          }}></View>
+        <CustomText
+          type="heading"
+          style={{marginLeft: wp(5), fontSize: fp(1.7), marginBottom: hp(2)}}>
+          Find a book want to learn
+        </CustomText>
+        <SearchTextInput
+          value={searchText}
+          onChangeText={handleSearchTextChange}
+          onSearch={handleSearch}
+          style={{color: color.DIM_BLACK, width: wp(80), height: hp(4)}}
+        />
+        {/* </View> */}
+      </ImageBackground>
       <KeyboardAwareScrollView>
-        <StatusBar
-          backgroundColor={color.PRIMARY_BLUE}
-          barStyle="light-content"
-        />
-
-        <Image
-          source={headerBg}
-          style={{height: hp(21), width: wp(100)}}
-          resizeMode="cover"
-        />
-        <View style={{position: 'absolute'}}>
-          <Header title={'SOHOJ PORA'} />
-          <View
-            style={{
-              borderTopWidth: fp(0.2),
-              borderColor: color.WHITE,
-              marginBottom: hp(2),
-            }}></View>
-          <CustomText
-            type="heading"
-            style={{marginLeft: wp(5), fontSize: fp(1.7), marginBottom: hp(2)}}>
-            Find a course want to learn
-          </CustomText>
-          <SearchTextInput
-            value={searchText}
-            onChangeText={setSearchText}
-            onSearch={handleSearch}
-          />
-        </View>
         <View style={{backgroundColor: color.WHITE}}>
           <View
             style={{
@@ -164,8 +209,9 @@ const Books = ({navigation}) => {
                 style={{
                   fontFamily: typography.Inter_SemiBold,
                   color: color.DIM_BLACK,
+                  fontSize: fp(2),
                 }}>
-                Class 1
+                {category_data.name}
               </Text>
             </View>
             <View style={{marginTop: hp(1), marginHorizontal: wp(5)}}>
@@ -173,31 +219,66 @@ const Books = ({navigation}) => {
                 data={bookDetails}
                 renderItem={renderBooks}
                 horizontal
+                scrollEnabled={false}
               />
-            </View>
-
-            <View
-              style={{
-                marginHorizontal: wp(5),
-                marginTop: hp(2),
-              }}>
-              <View
-                style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Text
-                  style={{
-                    fontFamily: typography.Inter_SemiBold,
-                    color: color.DIM_BLACK,
-                  }}>
-                  Class 1-2 Bundle Books
-                </Text>
-              </View>
-              <View style={{marginTop: hp(2)}}>
-                {/* <BookCard showAuthor={false} bookDetails={bookDetails} /> */}
-              </View>
             </View>
           </View>
         </View>
       </KeyboardAwareScrollView>
+      <View
+        style={{
+          backgroundColor: color.WHITE,
+          borderTopWidth: fp(0.25),
+          borderTopColor: '#F2F2F2',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingHorizontal: wp(5),
+          paddingVertical: hp(1),
+          height: hp(10),
+        }}>
+        <CustomText
+          type={'typeRegular'}
+          style={{
+            fontFamily: typography.Inter_SemiBold,
+            fontSize: fp(2.35),
+            color: color.PRIMARY_BLUE,
+            lineHeight: fp(2.7),
+            // marginTop: hp(3),
+            alignSelf: 'center',
+          }}>
+          {' '}
+          ৳ {bookDetails[0]?.price}
+        </CustomText>
+        <ButtonComp
+          marginTop={0}
+          title="Buy Now"
+          onPress={() => {
+            setShowPaymentAlert(true);
+          }}
+        />
+      </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showPaymentAlert}
+        onRequestClose={() => setShowPaymentAlert(false)}>
+        <CustomAlert
+          title="Secure Payment Process"
+          subTitle="Secure payment gateway that keeps you safe from fraudsters and thieves"
+          img={PaymentAlertIllus}
+          onPress={() => {
+            setShowPaymentAlert(false);
+            navigation.navigate('AnalogPaymentForm', {
+              category_id: category_data.id,
+            });
+          }}
+          onClosePress={() => {
+            setShowPaymentAlert(false);
+          }}
+          btnTitle="Make Payment"
+        />
+      </Modal>
     </View>
   );
 };

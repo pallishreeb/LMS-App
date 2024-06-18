@@ -12,7 +12,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PdfBooks = ({navigation, route}) => {
   const {BookDetails} = route.params;
-  console.log('🚀 ~ PdfBooks ~ BookDetails:', BookDetails);
 
   const [status, setStatus] = useState('download');
   const [progress, setProgress] = useState(0);
@@ -26,6 +25,7 @@ const PdfBooks = ({navigation, route}) => {
 
   const checkFileStatus = async () => {
     const pdfUrl = BookDetails?.pdf_book;
+
     if (!pdfUrl) {
       // Handle the case where pdfUrl is undefined or null
       setStatus('download');
@@ -33,21 +33,27 @@ const PdfBooks = ({navigation, route}) => {
     }
 
     const lastIndex = pdfUrl.lastIndexOf('_edited_pdf');
+    if (lastIndex === -1) {
+      // If '_edited_pdf' is not found in the URL, set status to 'download'
+      setStatus('download');
+      return;
+    }
+
     const extractedString2 = pdfUrl.substring(lastIndex - 10, lastIndex + 12);
     const fileName = `${extractedString2}.pdf`;
     const cacheDir = RNFetchBlob.fs.dirs.CacheDir;
     const filePath = `${cacheDir}/${fileName}`;
 
-    const fileExists = await RNFetchBlob.fs.exists(filePath);
+    console.log('🚀 ~ checkFileStatus ~ cacheDir:', cacheDir);
+    console.log('🚀 ~ checkFileStatus ~ filePath:', filePath);
 
-    // Retrieve the previous link from AsyncStorage
-    const previousLink = await AsyncStorage.getItem('previousPdfLink');
+    try {
+      const fileExists = await RNFetchBlob.fs.exists(filePath);
+      console.log('🚀 ~ checkFileStatus ~ fileExists:', fileExists);
 
-    if (!firstTimeChecked) {
-      // First time checking, set status to 'download'
-      setStatus('download');
-      setFirstTimeChecked(true);
-    } else {
+      const previousLink = await AsyncStorage.getItem(BookDetails.title);
+      console.log('🚀 ~ checkFileStatus ~ previousLink:', previousLink);
+
       if (fileExists) {
         if (previousLink !== pdfUrl) {
           // If the file exists but the URL has changed, set status to 'update'
@@ -57,6 +63,7 @@ const PdfBooks = ({navigation, route}) => {
           setStatus('read');
         }
       } else {
+        // If the file does not exist, check the previous link
         if (previousLink && previousLink !== pdfUrl) {
           // If the file does not exist and the URL has changed, set status to 'update'
           setStatus('update');
@@ -65,12 +72,14 @@ const PdfBooks = ({navigation, route}) => {
           setStatus('download');
         }
       }
+
+      // Store the current link in AsyncStorage
+      await AsyncStorage.setItem(BookDetails.title, pdfUrl);
+      setFilePath(filePath);
+    } catch (error) {
+      console.error('🚀 ~ checkFileStatus ~ Error:', error);
+      setStatus('download');
     }
-
-    // Store the current link in AsyncStorage
-    await AsyncStorage.setItem('previousPdfLink', pdfUrl);
-
-    setFilePath(filePath);
   };
 
   const downloadPdf = async () => {

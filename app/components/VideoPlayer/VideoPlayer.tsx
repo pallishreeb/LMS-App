@@ -7,6 +7,8 @@ import {
   Button,
   StyleSheet,
   Pressable,
+  ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 
@@ -27,18 +29,16 @@ import {color} from '../../constants/colors/colors';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 
 const VideoPlayerEx = ({uri, handleIsLandscapeCb}) => {
-  const navigation = useNavigation();
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('transitionStart', () => {
-      setPaused(true);
-    });
-    return unsubscribe;
-  }, [navigation]);
   const isFocus = useIsFocused();
   useEffect(() => {
     setPaused(!isFocus);
   }, [isFocus]);
-
+  useEffect(() => {
+    Orientation.unlockAllOrientations(); // Allow both portrait and landscape orientations
+    return () => {
+      Orientation.lockToPortrait(); // Lock the orientation back to landscape when leaving the screen
+    };
+  }, []);
   const videoRef = useRef<any>(null);
   //states
   const [isLandscape, setIsLandscape] = useState(false);
@@ -118,6 +118,13 @@ const VideoPlayerEx = ({uri, handleIsLandscapeCb}) => {
 
   return (
     <View style={{}}>
+      {isLoading && (
+        <ActivityIndicator
+          size="large"
+          color={color.PRIMARY_BLUE}
+          style={styles.loader}
+        />
+      )}
       <TouchableOpacity
         style={{
           width: '100%',
@@ -265,6 +272,7 @@ const styles = StyleSheet.create({
   backgroundVideo: {
     height: hp(40),
     width: wp(40),
+    backgroundColor: 'white',
   },
 
   video_vertical: {
@@ -339,6 +347,12 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     resizeMode: 'contain',
     height: hp(2),
+  },
+  loader: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{translateX: -20}, {translateY: -20}],
   },
 });
 

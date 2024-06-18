@@ -7,6 +7,7 @@ export const styles = StyleSheet.create({
   wrapper: {
     height: Platform.OS === 'ios' ? hp(12) : hp(7),
     width: wp(100),
+    marginTop: hp(3),
     // flex: 1,
     // position: 'absolute',
   },
@@ -21,8 +22,7 @@ export const styles = StyleSheet.create({
   heading: {
     color: color.WHITE,
     fontSize: fp(2.2),
-
-    // marginLeft: Platform.OS === 'ios' ? hp(15) : hp(11),
+    // marginLeft: Platform.OS === 'ios' ? wp(15) : wp(30),
   },
   iconWidth: {
     width: wp(7.2),

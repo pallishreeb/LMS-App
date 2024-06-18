@@ -70,4 +70,4 @@ const BookCard = ({bookDetails, showAuthor}) => {
   );
 };
 
-export default BookCard;
+export default React.memo(BookCard);
