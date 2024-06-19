@@ -41,6 +41,7 @@ const DropDown = ({
       }}
       itemTextStyle={{
         padding: hp(0),
+        color: '#555555',
         paddingHorizontal: wp(0), // Adjust padding as needed
         paddingVertical: hp(0), // Adjust padding as needed
         marginVertical: hp(0),

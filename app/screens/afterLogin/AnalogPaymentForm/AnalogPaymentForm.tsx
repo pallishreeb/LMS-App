@@ -27,7 +27,6 @@ import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {BASE_URL} from '../../../constants/storageKeys';
-import {useIcon} from '../../../assets/icons/useIcon';
 import DropDown from '../../../components/DropDownComponent/DropDown';
 
 const AnalogPaymentForm = ({route, navigation}) => {
@@ -265,7 +264,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
     setLoading(true);
     try {
       const response = await axios.get(`https://bdapis.com/api/v1.2/divisions`);
-      setAllDivisions(response?.data?.data);
+      setAllDivisions(response.data.data);
       console.log('🚀 ~ getAllDivisions ~ response:', response.data.data);
     } catch (error) {
       console.error('Error fetching divisions:', error?.message);
@@ -697,6 +696,12 @@ const AnalogPaymentForm = ({route, navigation}) => {
       <View style={{width: wp(90), marginBottom: hp(1)}}>
         <ButtonComp title={'Send'} onPress={handleSendPress} />
       </View>
+      {loading && (
+        <View style={styles.loadingIndicator}>
+          <View style={styles.overlay} />
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
     </View>
   );
 };
@@ -709,5 +714,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     // marginTop: 25,
+  },
+  loadingIndicator: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 999,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Adjust opacity as needed
   },
 });
