@@ -19,24 +19,26 @@ import ProfileMenu from '../../screens/afterLogin/Profile/ProfileMenu/ProfileMen
 import AnalogPaymentForm from '../../screens/afterLogin/AnalogPaymentForm/AnalogPaymentForm';
 import FullImageView from '../../screens/afterLogin/viewFullImage/FullImageView';
 import BookBundles from '../../screens/afterLogin/Books/BookBundles';
+import Login from '../../screens/beforeLogin/login/Login';
+import Otp from '../../screens/beforeLogin/otp/Otp';
 
 const Stack = createStackNavigator();
 const AfterLoginStack = route => {
   return (
     <Stack.Navigator
-      initialRouteName={'MyStack'}
+      initialRouteName={'BottomTab'}
       screenOptions={{
         headerStyle: {elevation: 0},
         cardStyle: {backgroundColor: '#fff'},
       }}>
       {/* //added file */}
+
       <Stack.Screen
         name="BottomTab"
         component={BottomTab}
         options={{headerShown: false}}
       />
-      <Stack.Screen name="Home" component={Home} />
-
+      {/* <Stack.Screen name="Home" component={Home} /> */}
       <Stack.Screen
         name="BookDetails"
         component={BookDetails}
@@ -134,6 +136,12 @@ const AfterLoginStack = route => {
         component={BookBundles}
         options={{headerShown: false}}
       />
+      <Stack.Screen
+        name="Login"
+        component={Login}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen name="Otp" component={Otp} options={{headerShown: false}} />
     </Stack.Navigator>
   );
 };

@@ -125,4 +125,7 @@ export const useIcon = {
       // style={{marginRight: wp(2)}}
     />
   ),
+  ContentCopy: () => (
+    <MaterialIcons name="content-copy" size={fp(3.2)} color={'#828282'} />
+  ),
 };

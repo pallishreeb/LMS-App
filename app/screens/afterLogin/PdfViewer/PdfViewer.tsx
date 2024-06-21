@@ -8,55 +8,28 @@ import {
   Text,
 } from 'react-native';
 import Pdf from 'react-native-pdf';
-import {
-  BallIndicator,
-  BarIndicator,
-  DotIndicator,
-  MaterialIndicator,
-  PacmanIndicator,
-  PulseIndicator,
-  SkypeIndicator,
-  UIActivityIndicator,
-  WaveIndicator,
-} from 'react-native-indicators';
-import {fp, hp, wp} from '../../../helpers/resDimension';
-import {createEntityAdapter} from '@reduxjs/toolkit';
 import {color} from '../../../constants/colors/colors';
-import CustomText from '../../../components/text/CustomText';
-import Header from '../../../components/header/Header';
+
 import RNFetchBlob from 'rn-fetch-blob';
 
 const PdfViewer = ({navigation, route}) => {
   const {BookDetails} = route.params;
-
-  // const source = {
-  //   uri: `${BookDetails.pdf_book}`,
-  //   cache: true,
-  // };
-  const url = BookDetails?.pdf_book;
-  const lastIndex = url.lastIndexOf('_edited_pdf');
-  const extractedString2 = url.substring(lastIndex - 10, lastIndex + 12);
-  const fileName = `${extractedString2}.pdf`;
+  const pdfUrl = BookDetails.pdf_book;
+  const fileNameWithExtension = pdfUrl.substring(pdfUrl.lastIndexOf('/') + 1);
   const cacheDir = RNFetchBlob.fs.dirs.CacheDir;
-  const filePath = `${cacheDir}/${fileName}`;
+  const filePath = `${cacheDir}/${fileNameWithExtension}`;
+  console.log('🚀 ~ PdfViewer ~ BookDetails:', BookDetails);
+  // const filePath = `${cacheDir}/${url}`;
+
   const source = {
     uri: filePath,
     cache: true,
   };
 
-  // const handlePdfLoading = e => {
-  //   setIsLoading(true);
-  //   setPdfLoadingPercentage(e);
-  // };
-
   return (
     <View style={styles.container}>
       <Pdf
-        trustAllCerts={false}
         source={source}
-        // onLoadProgress={progress => {
-        //   console.log('loading Progress', progress);
-        // }}
         onLoadComplete={(numberOfPages, filePath) => {
           console.log(`Number of pages: ${numberOfPages}`);
         }}
@@ -67,7 +40,6 @@ const PdfViewer = ({navigation, route}) => {
           console.log(error);
         }}
         onPressLink={uri => {
-          // navigation.navigate('BookVideos', {BookDetails: uri});
           navigation.navigate('BookVideos', {
             BookDetails: BookDetails,
             VideoUri: uri,
@@ -75,7 +47,6 @@ const PdfViewer = ({navigation, route}) => {
           console.log(`Link pressed: ${uri}`);
         }}
         style={styles.pdf}
-        // onLoadProgress={handlePdfLoading}
       />
     </View>
   );

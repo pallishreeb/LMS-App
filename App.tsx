@@ -4,12 +4,13 @@ import {NavigationContainer} from '@react-navigation/native';
 import AfterLoginStack from './app/components/navigators/AfterLoginStack';
 import BeforeLoginStack from './app/components/navigators/BeforeLoginStack';
 import SplashScreen from 'react-native-splash-screen';
-import {Provider} from 'react-redux';
+import {Provider, useSelector} from 'react-redux';
 import {store} from './app/redux/Store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MyOrders from './app/screens/afterLogin/MyOrders/MyOrders';
 import {MyDrawer} from './app/helpers/DrawerNavigation/DrawerNavigation';
 import Orientation from 'react-native-orientation-locker';
+import RootNavigation from './RootNavigation';
 export default function App() {
   useEffect(() => {
     setTimeout(() => {
@@ -42,9 +43,7 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        {token ? <AfterLoginStack /> : <BeforeLoginStack />}
-      </NavigationContainer>
+      <RootNavigation />
     </Provider>
   );
 }

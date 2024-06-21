@@ -42,6 +42,7 @@ import CommentButton from '../../../components/LikeButton/CommentButton';
 import {useNavigationState} from '@react-navigation/native';
 const BookVideos: React.FC = ({navigation, route}) => {
   const {BookDetails, VideoUri} = route.params;
+  console.log('🚀 ~ VideoUri:', VideoUri);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [commentText, SetCommentText] = useState('');

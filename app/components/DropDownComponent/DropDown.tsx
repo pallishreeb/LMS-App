@@ -14,8 +14,6 @@ const DropDown = ({
   },
   placeHolderText,
 }) => {
-  console.log('🚀 ~ data:', data);
-
   return (
     <Dropdown
       style={{

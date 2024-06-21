@@ -40,6 +40,8 @@ import {
 import auth from '@react-native-firebase/auth';
 import DrawerIcons from '../../../assets/DrawerAssets';
 import axios from 'axios';
+import {useDispatch} from 'react-redux';
+import {login} from '../../../redux/authSlice';
 
 const Login = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -141,7 +143,12 @@ const Login = ({navigation}) => {
           'user_id',
           response?.data?.user?.id.toString(),
         );
-        navigation.navigate('Home');
+        dispatch(
+          login({
+            userName: response?.data?.name,
+            userEmail: response?.data?.email,
+          }),
+        );
       }
     } catch (error) {
       console.log('inside catch', error.message);
@@ -264,8 +271,16 @@ const Login = ({navigation}) => {
       setPasswordErrorMsg('');
     }
   };
-  async function onAlertOK(params: type) {
-    navigation.navigate('Home');
+  const dispatch = useDispatch();
+  async function onAlertOK(data) {
+    console.log('🚀 ~ onAlertOK ~ data:', data);
+    dispatch(
+      login({
+        userName: data?.name,
+        userEmail: data?.email,
+      }),
+    );
+
     await AsyncStorage.setItem('loginType', 'mannual');
   }
   function onOtpOkPress(response) {
@@ -300,7 +315,7 @@ const Login = ({navigation}) => {
           Alert.alert('Information', `${response.data.message}`, [
             {
               text: 'Ok',
-              onPress: onAlertOK,
+              onPress: () => onAlertOK(response?.data?.data),
               style: 'default',
             },
           ]);

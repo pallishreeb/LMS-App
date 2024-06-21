@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useState} from 'react';
@@ -28,9 +29,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {BASE_URL} from '../../../constants/storageKeys';
 import DropDown from '../../../components/DropDownComponent/DropDown';
+import Clipboard from '@react-native-clipboard/clipboard';
+import {useIcon} from '../../../assets/icons/useIcon';
 
 const AnalogPaymentForm = ({route, navigation}) => {
-  const {category_id} = route.params;
+  const {category_data} = route.params;
   function onHeaderLeftPress() {
     navigation.goBack();
   }
@@ -43,6 +46,10 @@ const AnalogPaymentForm = ({route, navigation}) => {
   const [mobile, setMobile] = useState('');
   const [amount, setAmount] = useState('');
   const [className, setClassName] = useState('');
+  const [isPaymentModeFocus, setIsPaymentModeFocus] = useState('');
+  const [paymentMode, setPaymentMode] = useState('');
+  const [allPaymentModes, setAllPaymentModes] = useState([]);
+  const [paymentModeData, setPaymentModeData] = useState([]);
   const [paymentNumber, setPaymentNumber] = useState('');
   const [showAddPhotoModal, setShowAddPhotoModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -65,7 +72,6 @@ const AnalogPaymentForm = ({route, navigation}) => {
       });
       return; // Exit the function if pic is not available
     }
-
     // Check for other form data values
     if (
       !division ||
@@ -116,7 +122,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
     formData.append('student_name', studentName);
     formData.append('mobile_number', mobile);
     formData.append('user_id', userId);
-    formData.append('category_id', category_id.toString());
+    formData.append('category_id', category_data?.id.toString());
     formData.append('amount', amount);
 
     console.log(
@@ -165,7 +171,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
           },
           response => {
             console.log(response);
-            setImageResponse(response?.assets[0]);
+
             if (response.didCancel) {
               Alert.alert('Information', 'Operation Cancelled');
               return;
@@ -177,6 +183,9 @@ const AnalogPaymentForm = ({route, navigation}) => {
               return;
             } else if (response.errorCode == 'others') {
               Alert.alert('Information', response.errorMessage);
+              return;
+            } else {
+              setImageResponse(response?.assets[0]);
               return;
             }
           },
@@ -204,7 +213,6 @@ const AnalogPaymentForm = ({route, navigation}) => {
           mediaType: 'photo',
         },
         response => {
-          setImageResponse(response?.assets[0]);
           if (response.didCancel) {
             Alert.alert('Information', 'Operation Cancelled');
             return;
@@ -216,6 +224,9 @@ const AnalogPaymentForm = ({route, navigation}) => {
             return;
           } else if (response.errorCode == 'others') {
             Alert.alert('Information', response.errorMessage);
+            return;
+          } else {
+            setImageResponse(response?.assets[0]);
             return;
           }
         },
@@ -255,10 +266,21 @@ const AnalogPaymentForm = ({route, navigation}) => {
   function handlePaymentNumber(text: string): void {
     setPaymentNumber(text);
   }
+  function handlePaymentMode(text: string): void {
+    console.log('🚀 ~ handlePaymentMode ~ text:', text);
+    setPaymentMode(text);
+    setPaymentNumber(getPaymentNumber(text));
+  }
   const getUpazillasByDistrict = districtName => {
     const district = districtRes.find(d => d.district === districtName);
     return district ? district.upazilla : [];
   };
+  function getPaymentNumber(paymentMethod) {
+    const selectedItem = paymentModeData.find(
+      item => item.payment_method === paymentMethod,
+    );
+    return selectedItem ? selectedItem.payment_number : null;
+  }
 
   async function getAllDivisions() {
     setLoading(true);
@@ -306,6 +328,47 @@ const AnalogPaymentForm = ({route, navigation}) => {
     }
   }
 
+  async function getPaymentModes() {
+    console.log('🚀 ~ getPaymentNumber ~ getPaymentNumber:');
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        'http://43.204.161.117/api/payment-methods',
+      );
+      console.log(response.status, 'response.status');
+      console.log('🚀 ~ getPaymentNumber ~ response:', response.status);
+      if (response.status === 200) {
+        setPaymentModeData(response.data);
+        setAllPaymentModes(
+          response?.data?.map((paymentMode: any, index: any) => ({
+            label: paymentMode.payment_method,
+            value: paymentMode.payment_method,
+          })),
+        );
+        setLoading(false);
+      }
+    } catch (error) {
+      Snackbar.show({
+        text: response?.data?.message,
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+      // }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleCopyPress() {
+    Clipboard.setString(paymentNumber);
+    Snackbar.show({
+      text: 'Code Copied Sucessfully',
+      duration: 4000,
+      backgroundColor: color.PRIMARY_BLUE,
+    });
+    console.log('handle Copy press');
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -322,7 +385,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
         onPress={onHeaderLeftPress}
       />
       <KeyboardAwareScrollView contentContainerStyle={{paddingBottom: hp(2)}}>
-        <View style={{marginTop: hp(2)}}>
+        {/* <View style={{marginTop: hp(2)}}>
           <Text
             style={{
               color: '#565555',
@@ -346,6 +409,71 @@ const AnalogPaymentForm = ({route, navigation}) => {
             }}>
             01974-810837
           </Text>
+        </View> */}
+
+        <View style={{marginTop: hp(2)}}>
+          <Text
+            style={{
+              color: '#565555',
+              fontFamily: typography.Inter_Medium,
+              fontSize: fp(1.8),
+            }}>
+            Payment Option
+          </Text>
+          <DropDown
+            placeHolderText={'Select Payment Mode'}
+            handleValue={handlePaymentMode}
+            isFocus={isPaymentModeFocus}
+            setIsFocus={setIsPaymentModeFocus}
+            data={allPaymentModes}
+            value={paymentMode}
+            alternateFunction={getPaymentModes}
+          />
+        </View>
+
+        <View style={{marginTop: hp(2)}}>
+          <Text
+            style={{
+              color: '#565555',
+              fontFamily: typography.Inter_Medium,
+              fontSize: fp(1.8),
+            }}>
+            Payment Number
+          </Text>
+          <View
+            style={{
+              width: wp(90),
+              borderRadius: fp(1),
+              backgroundColor: color.WHITE,
+              borderWidth: fp(0.3),
+              marginTop: hp(1.5),
+              borderColor: 'rgb(130,81,238)',
+              flexDirection: 'row',
+              justifyContent: 'space-around',
+              alignItems: 'center',
+            }}>
+            <Text
+              style={{
+                // backgroundColor: 'rgba(54,75,159,0.2)',
+                width: wp(90),
+                borderRadius: fp(1),
+                color: '#565555',
+                padding: fp(2),
+                fontFamily: typography.Inter_Medium,
+                fontSize: fp(1.8),
+                fontWeight: '700',
+                marginLeft: wp(10),
+              }}>
+              {paymentNumber}
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                handleCopyPress();
+              }}
+              style={{alignSelf: 'center', marginRight: wp(15)}}>
+              {useIcon.ContentCopy()}
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={{marginTop: hp(2)}}>
@@ -388,7 +516,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
             <ButtonComp title={'Add image'} onPress={handleAddImage} />
           )}
         </View>
-        <View style={{marginTop: hp(2)}}>
+        {/* <View style={{marginTop: hp(2)}}>
           <Text
             style={{
               color: '#565555',
@@ -410,7 +538,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
             placeholderTextColor="#565555"
             onChangeText={handlePaymentNumber}
           />
-        </View>
+        </View> */}
         <View style={{marginTop: hp(2)}}>
           <Text
             style={{
@@ -500,7 +628,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
               color: '#565555',
               padding: wp(2),
             }}
-            placeholder="92/a, Moneshwor Road (1st Floor), Zikatola, 1209"
+            placeholder="Ideal School and College"
             placeholderTextColor="#565555"
             onChangeText={handleSchoolName}
           />
@@ -694,7 +822,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
         </Pressable>
       ) : null}
       <View style={{width: wp(90), marginBottom: hp(1)}}>
-        <ButtonComp title={'Send'} onPress={handleSendPress} />
+        <ButtonComp title={'Send Request'} onPress={handleSendPress} />
       </View>
       {loading && (
         <View style={styles.loadingIndicator}>

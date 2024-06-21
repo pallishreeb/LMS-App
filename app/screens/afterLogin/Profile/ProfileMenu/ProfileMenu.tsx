@@ -92,7 +92,11 @@ const ProfileMenu = ({navigation}) => {
     );
   }
   async function OnSignOutAlertOK() {
-    navigation.closeDrawer();
+    GoogleSignin.configure({
+      webClientId:
+        '723565053960-od53ug0qkd44176je7067hhijuqoie8v.apps.googleusercontent.com',
+      offlineAccess: true,
+    });
     const loginType = await AsyncStorage.getItem('loginType');
     if (loginType == 'google') {
       await GoogleSignin.revokeAccess();

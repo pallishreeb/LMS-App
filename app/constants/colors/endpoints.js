@@ -13,6 +13,7 @@ export const endpoints = {
   UPDATE_PROFILE: 'profile/update-profile',
   CHANGE_PASSWORD: 'profile/change-password',
   GET_BOOKS_BY_CATEGORY_ID: 'categories/search-book?category_id=',
+  GET_PAYMENT_HISTORY_BY_USER_ID: 'analog-payments/user/',
 
   //?  CHAT
   GET_ALL_MESSAGES: 'chat/messages',

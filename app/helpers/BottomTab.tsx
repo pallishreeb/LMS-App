@@ -40,6 +40,7 @@ const BottomTab = () => {
     <Tab.Navigator
       initialRouteName={'Home'}
       screenOptions={({route}) => ({
+        headerShown: false,
         tabBarActiveTintColor: '#f5610a',
         tabBarInactiveTintColor: '#555',
         tabBarStyle: {height: hp(7)},

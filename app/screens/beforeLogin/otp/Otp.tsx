@@ -23,7 +23,7 @@ const Otp = ({navigation, route}) => {
   const [res, setRes] = useState({});
   const [currentOtp, setCurrentOtp] = useState('');
   async function onAlertOK(params: type) {
-    navigation.navigate('MyDrawer');
+    navigation.navigate('Home');
     await AsyncStorage.setItem('loginType', 'mannual');
   }
   const handleVerifyOtp = async () => {

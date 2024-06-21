@@ -30,9 +30,17 @@ const BookBundles = ({navigation}) => {
     navigation.navigate('ProfileMenu');
     // navigation.navigate('Chat');
   }
+
   useEffect(() => {
-    handleGetCategories();
-  }, []);
+    const focusListener = navigation.addListener('focus', () => {
+      handleGetCategories();
+    });
+
+    // Clean up the listener on component unmount
+    return () => {
+      focusListener();
+    };
+  }, [navigation]);
 
   const handleGetCategories = async () => {
     try {
@@ -50,10 +58,15 @@ const BookBundles = ({navigation}) => {
         );
         if (bookCategories.length > 0) {
           setClassData(bookCategories);
+          console.log(
+            '🚀 ~ handleGetCategories ~ bookCategories:',
+            bookCategories,
+          );
         } else {
           // Handle case where there are no book categories
           console.log('No categories of type "Book" found.');
         }
+
         setIsLoading(false);
       }
     } catch (error) {
@@ -69,7 +82,7 @@ const BookBundles = ({navigation}) => {
     }
   };
   function handleClassPress(item) {
-    navigation.navigate('Books', {category_data: item});
+    navigation.navigate('PdfBooks', {category_data: item});
   }
 
   const HEADER_COLOR = 'rgba(0, 0, 255, 1)'; // Blue

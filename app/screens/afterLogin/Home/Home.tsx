@@ -25,26 +25,92 @@ import {apiClient} from '../../../helpers/apiClient';
 import {endpoints} from '../../../constants/colors/endpoints';
 import Snackbar from 'react-native-snackbar';
 import {FlatList} from 'react-native-gesture-handler';
-import BitMovinVideoPlayerComp from '../../../components/bitMovinVideoComp/BitMovinVideoPlayer';
 
 const Home = ({navigation}) => {
   const [searchText, setSearchText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [bookDetails, setBookDetails] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [res, setRes] = useState([]);
+
+  const [latestCategory, setLatestCategory] = useState({});
   const handleSearch = () => {
     // Perform search functionality here
     console.log('Searching for:', searchText);
   };
-  // useEffect(() => {
 
-  // }, []);
+  const handleGetCategories = async () => {
+    try {
+      setIsLoading(true);
+      const response = await apiClient.get(`${endpoints.GET_CATEGORIES}`);
+      console.log(response.status, 'response.status');
+      if (response.status === 200) {
+        console.log(
+          '🚀 ~ handleGetBooks ~ response?.data?.books:',
+          response?.data?.books,
+        );
+        const categories = response?.data?.categories;
+        const bookCategories = categories.filter(
+          (category: {type: string}) => category.type === 'Book',
+        );
+        console.log(
+          '🚀 ~ handleGetCategories ~ bookCategories:',
+          bookCategories,
+        );
+        if (bookCategories.length > 0) {
+          const latestCategory = bookCategories.shift();
+          setLatestCategory(latestCategory);
+          handleGetBooksByCategoryId(latestCategory?.id);
+        } else {
+          // Handle case where there are no book categories
+          console.log('No categories of type "Book" found.');
+        }
 
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.log('inside catch', error?.message);
+      Snackbar.show({
+        text: response?.data?.message,
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+      // }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGetBooksByCategoryId = async category_id => {
+    try {
+      setIsLoading(true);
+      const response = await apiClient.get(
+        `${endpoints.GET_BOOKS_BY_CATEGORY_ID}${category_id}`,
+      );
+      if (response.status === 200) {
+        console.log(
+          '🚀 ~ handleGetBooksByCategoryId ~ response?.data:',
+          response?.data,
+        );
+        setRes(response?.data);
+      }
+    } catch (error) {
+      console.log('Error:', error.message);
+      Snackbar.show({
+        text: error.message,
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     const focusListener = navigation.addListener('focus', () => {
       console.log('focusListener works');
       handleGetBooks();
       handleGetCourses();
+      handleGetCategories();
     });
 
     // Clean up the listener on component unmount
@@ -52,6 +118,12 @@ const Home = ({navigation}) => {
       focusListener();
     };
   }, [navigation]);
+
+  useEffect(() => {
+    handleGetBooks();
+    handleGetCourses();
+    handleGetCategories();
+  }, []);
 
   const handleGetBooks = async () => {
     console.log('🚀 ~ handleGetBooks ~ handleGetBooks:');
@@ -103,19 +175,13 @@ const Home = ({navigation}) => {
     }
   };
 
-  const recommendImgList = [
-    dummyRecommend,
-    dummyRecommend,
-    dummyRecommend,
-    dummyRecommend,
-    dummyRecommend,
-    dummyRecommend,
-  ];
-
   const renderBooks = ({item}) => {
+    console.log('🚀 ~ renderBooks ~ item:', item);
     return (
       <Pressable
-        onPress={() => navigation.navigate('BookDetails', {BookDetails: item})}>
+        onPress={() =>
+          navigation.navigate('PdfBooks', {category_data: latestCategory})
+        }>
         <View
           style={{
             backgroundColor: color.WHITE,
@@ -174,34 +240,11 @@ const Home = ({navigation}) => {
       </Pressable>
     );
   };
-  function onLeftPress() {
-    // navigation.openDrawer();
-  }
+
   function onRightPress() {
     navigation.navigate('ProfileMenu');
-    // navigation.navigate('Chat');
   }
 
-  // useEffect(() => {
-  //   const backAction = () => {
-  //     Alert.alert('Hold on!', 'Are you sure you want to exit the app?', [
-  //       {
-  //       text: 'Cancel',
-  //         onPress: () => null,
-  //         style: 'cancel',
-  //       },
-  //       {text: 'YES', onPress: () => BackHandler.exitApp()},
-  //     ]);
-  //     return true;
-  //   };
-
-  //   const backHandler = BackHandler.addEventListener(
-  //     'hardwareBackPress',
-  //     backAction,
-  //   );
-
-  //   return () => backHandler.remove();
-  // }, []);
   const renderCourses = ({item}) => {
     console.log('🚀 ~ renderCourses ~ item:', item.name);
     return (
@@ -339,14 +382,15 @@ const Home = ({navigation}) => {
               style={{
                 fontFamily: typography.Inter_SemiBold,
                 color: color.DIM_BLACK,
+                fontSize: fp(1.8),
               }}>
-              Class 1
+              {latestCategory.name}
             </Text>
 
             <Pressable
               onPress={() => {
-                // navigation.navigate('Books');
-                navigation.navigate('VideoPlayerEx');
+                navigation.navigate('BookBundles');
+                // navigation.navigate('VideoPlayerEx');
                 // navigation.navigate('BookVideos');
               }}>
               <Text
@@ -362,7 +406,7 @@ const Home = ({navigation}) => {
           </View>
           <View style={{marginTop: hp(1), marginHorizontal: wp(5)}}>
             <FlatList
-              data={bookDetails}
+              data={res}
               renderItem={renderBooks}
               horizontal
               scrollEnabled={false}
