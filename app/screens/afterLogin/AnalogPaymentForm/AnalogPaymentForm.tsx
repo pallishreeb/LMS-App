@@ -139,7 +139,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
       Alert.alert(
         'Information',
         'Your details have been successfully saved. We will contact you once they have been verified.',
-        [{text: 'OK', onPress: () => navigation.navigate('BookBundle')}],
+        [{text: 'OK', onPress: () => navigation.navigate('BookBundles')}],
       );
       console.log('🚀 ~ handleSumbitAnalogForm ~ response:', response);
     } else {

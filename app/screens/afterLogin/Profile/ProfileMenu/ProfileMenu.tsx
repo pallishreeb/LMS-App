@@ -108,6 +108,9 @@ const ProfileMenu = ({navigation}) => {
       navigation.navigate('Login');
     }
   }
+  function handleSettings() {
+    navigation.navigate('Settings');
+  }
   return (
     <View
       style={{
@@ -260,7 +263,7 @@ const ProfileMenu = ({navigation}) => {
           justifyContent: 'center',
           alignSelf: 'center',
         }}>
-        <TouchableOpacity onPress={handleEditProfile}>
+        <TouchableOpacity onPress={handleSettings}>
           <List.Item
             title="Settings"
             titleStyle={{

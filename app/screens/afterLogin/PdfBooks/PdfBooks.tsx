@@ -87,6 +87,10 @@ const PdfBooks = ({navigation, route}) => {
       const response = await apiClient.get(
         `${endpoints.GET_BOOKS_BY_CATEGORY_ID}${category_data.id}`,
       );
+      console.log(
+        '🚀 ~ handleGetBooksByCategoryId ~ response:',
+        response?.data,
+      );
       if (response.status === 200) {
         const incompletedBooks = response.data.filter(
           book => book.status === 'Incomplete',

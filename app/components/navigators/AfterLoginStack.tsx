@@ -21,6 +21,7 @@ import FullImageView from '../../screens/afterLogin/viewFullImage/FullImageView'
 import BookBundles from '../../screens/afterLogin/Books/BookBundles';
 import Login from '../../screens/beforeLogin/login/Login';
 import Otp from '../../screens/beforeLogin/otp/Otp';
+import Settings from '../../screens/afterLogin/Settings/Settings';
 
 const Stack = createStackNavigator();
 const AfterLoginStack = route => {
@@ -47,6 +48,11 @@ const AfterLoginStack = route => {
       <Stack.Screen
         name="Payment"
         component={Payment}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={Settings}
         options={{headerShown: false}}
       />
 
