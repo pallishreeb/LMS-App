@@ -320,12 +320,27 @@ const PdfBooks = ({navigation, route}) => {
         font={'regular'}
         leftIconName={'leftArrow'}
       />
-      {completedBooks.length > 0 && (
+      {completedBooks.length > 0 ? (
         <FlatList
           data={completedBooks}
           renderItem={renderItem}
           keyExtractor={item => item.id.toString()}
         />
+      ) : (
+        // <View style={styles.loadingIndicator}>
+        <Text
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            color: 'black',
+            textAlignVertical: 'center',
+            fontWeight: '600',
+            fontSize: fp(1.8),
+          }}>
+          {' '}
+          No Books found for this category
+        </Text>
+        // </View>
       )}
       {incompletedBooks.length > 0 && (
         <View
@@ -390,7 +405,7 @@ const PdfBooks = ({navigation, route}) => {
                   alignSelf: 'center',
                   textDecorationLine: 'line-through',
                 }}>
-                ৳ {Number(category_data?.price) + 100}.00
+                ৳ {Number(category_data?.price) + 500}.00
               </CustomText>
               {'  '}৳ {category_data?.price}
             </CustomText>
@@ -402,7 +417,8 @@ const PdfBooks = ({navigation, route}) => {
                 color: 'black',
                 marginLeft: wp(2),
               }}>
-              Validity {date_one_year_from_today}
+              {/* Validity {date_one_year_from_today} */}
+              Validity 31 Dec 2024
             </CustomText>
           </View>
           <ButtonComp

@@ -133,7 +133,7 @@ const BookBundles = ({navigation}) => {
       />
       <ImageBackground
         source={headerBg}
-        style={{height: hp(22), width: wp(100), alignSelf: 'center'}}
+        style={{height: hp(10), width: wp(100), alignSelf: 'center'}}
         resizeMode="cover"
         imageStyle={{
           borderBottomLeftRadius: fp(3),
@@ -146,13 +146,13 @@ const BookBundles = ({navigation}) => {
           onRightPress={onRightPress}
           leftIcon={false}
         />
-        <View
+        {/* <View
           style={{
             borderTopWidth: fp(0.2),
             borderColor: color.WHITE,
             marginBottom: hp(1),
-          }}></View>
-        <CustomText
+          }}></View> */}
+        {/* <CustomText
           type="heading"
           style={{marginLeft: wp(5), fontSize: fp(1.7), marginBottom: hp(2)}}>
           Find a course want to learn
@@ -162,7 +162,7 @@ const BookBundles = ({navigation}) => {
           onChangeText={handleSearchTextChange}
           onSearch={handleSearch}
           style={{color: color.DIM_BLACK, width: wp(80), height: hp(4)}}
-        />
+        /> */}
       </ImageBackground>
       <KeyboardAwareScrollView>
         <Text

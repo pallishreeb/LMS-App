@@ -42,8 +42,9 @@ const OpenBook = require('./OpenBook.png');
 const Download = require('./Download.png');
 const Update = require('./Update.png');
 const FullBg = require('./FullBg.png');
-
+const MyBooks = require('./MyBooks.png');
 export {
+  MyBooks,
   FullBg,
   Update,
   Download,

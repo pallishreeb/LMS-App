@@ -144,7 +144,7 @@ const SignUp = ({navigation}) => {
       });
       // console.log(response.status, 'response.status');
       if (response.status === 200) {
-        // console.log(response?.data);
+        console.log(response?.data, 'signUp Response');
         setRes(response.data);
         Alert.alert('Info', `${response.data.message}`, [
           {

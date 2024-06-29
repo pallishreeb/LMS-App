@@ -326,7 +326,7 @@ const Home = ({navigation}) => {
       />
       <ImageBackground
         source={headerBg}
-        style={{height: hp(22), width: wp(100), alignSelf: 'center'}}
+        style={{height: hp(10), width: wp(100), alignSelf: 'center'}}
         resizeMode="cover"
         imageStyle={{
           borderBottomLeftRadius: fp(3),
@@ -339,7 +339,8 @@ const Home = ({navigation}) => {
           onRightPress={onRightPress}
           leftIcon={false}
         />
-        <View
+
+        {/* <View
           style={{
             borderTopWidth: fp(0.2),
             borderColor: color.WHITE,
@@ -355,7 +356,7 @@ const Home = ({navigation}) => {
           onChangeText={handleSearchTextChange}
           onSearch={handleSearch}
           style={{color: color.DIM_BLACK, width: wp(80), height: hp(4)}}
-        />
+        /> */}
         {/* </View> */}
       </ImageBackground>
 

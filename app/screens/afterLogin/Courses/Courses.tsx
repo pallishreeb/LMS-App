@@ -133,7 +133,7 @@ const Courses = ({navigation}) => {
     <View style={{flex: 1, backgroundColor: color.DIM_WHITE}}>
       <ImageBackground
         source={headerBg}
-        style={{height: hp(22), width: wp(100), alignSelf: 'center'}}
+        style={{height: hp(10), width: wp(100), alignSelf: 'center'}}
         resizeMode="cover"
         imageStyle={{
           borderBottomLeftRadius: fp(3),
@@ -146,7 +146,7 @@ const Courses = ({navigation}) => {
           onRightPress={onRightPress}
           leftIcon={false}
         />
-        <View
+        {/* <View
           style={{
             borderTopWidth: fp(0.2),
             borderColor: color.WHITE,
@@ -162,7 +162,7 @@ const Courses = ({navigation}) => {
           onChangeText={handleSearchTextChange}
           onSearch={handleSearch}
           style={{color: color.DIM_BLACK, width: wp(80), height: hp(4)}}
-        />
+        /> */}
         {/* </View> */}
       </ImageBackground>
 

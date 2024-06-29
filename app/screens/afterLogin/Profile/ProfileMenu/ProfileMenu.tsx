@@ -10,7 +10,12 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {fp, hp, wp} from '../../../../helpers/resDimension';
-import {DummyProfImg, FullBg, headerBg} from '../../../../assets/images';
+import {
+  DummyProfImg,
+  FullBg,
+  MyBooks,
+  headerBg,
+} from '../../../../assets/images';
 import {typography} from '../../../../assets/fonts/typography';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {apiClient} from '../../../../helpers/apiClient';
@@ -338,6 +343,48 @@ const ProfileMenu = ({navigation}) => {
           }}
         />
       </View>
+      <View
+        style={{
+          width: wp(90),
+          marginLeft: wp(5),
+          justifyContent: 'center',
+          alignSelf: 'center',
+        }}>
+        <TouchableOpacity onPress={() => navigation.navigate('BookBundles')}>
+          <List.Item
+            title="My Books"
+            titleStyle={{
+              fontFamily: typography.Inter_Bold,
+              color: 'black',
+              fontSize: fp(1.8),
+              justifyContent: 'center',
+            }}
+            left={props => (
+              <Image
+                source={require('../../../../assets/images/MyBooks.png')}
+                style={{height: hp(6), width: fp(5)}}
+                resizeMode="contain"
+              />
+            )}
+            right={props => (
+              <Image
+                source={RightArrow}
+                style={{height: hp(3), width: fp(2), alignSelf: 'center'}}
+                resizeMode="contain"
+              />
+            )}
+          />
+        </TouchableOpacity>
+        <View
+          style={{
+            height: fp(0.1),
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            width: wp(82),
+            alignSelf: 'center',
+          }}
+        />
+      </View>
+
       <View
         style={{
           width: wp(90),

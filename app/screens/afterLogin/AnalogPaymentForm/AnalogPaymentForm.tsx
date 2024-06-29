@@ -628,7 +628,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
               color: '#565555',
               padding: wp(2),
             }}
-            placeholder="Ideal School and College"
+            placeholder="Enter School Name"
             placeholderTextColor="#565555"
             onChangeText={handleSchoolName}
           />
@@ -651,7 +651,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
               color: '#565555',
               padding: wp(2),
             }}
-            placeholder="9"
+            placeholder="Enter Class Name"
             placeholderTextColor="#565555"
             onChangeText={handleClass}
             keyboardType="number-pad"
@@ -675,7 +675,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
               color: '#565555',
               padding: wp(2),
             }}
-            placeholder="Abdul"
+            placeholder="Enter Student Name"
             placeholderTextColor="#565555"
             onChangeText={handleStudentName}
           />
@@ -698,7 +698,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
               color: '#565555',
               padding: wp(2),
             }}
-            placeholder="98909809809"
+            placeholder="Enter Your Mobile Number"
             placeholderTextColor="#565555"
             onChangeText={handleMobile}
           />
