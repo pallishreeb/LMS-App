@@ -70,6 +70,38 @@ const ProfileMenu = ({navigation}) => {
     handleGetProfile();
   }, []);
 
+  const getUserPaymentDetails = async () => {
+    try {
+      const user_id = await AsyncStorage.getItem('user_id');
+      console.log('🚀 ~ handleGetPaymentHistory ~ user_id:', user_id);
+      setIsLoading(true);
+      const response = await apiClient.get(
+        `${endpoints.GET_PAYMENT_HISTORY_BY_USER_ID}${user_id}`,
+      );
+      if (response.status === 200) {
+        console.log(response.data);
+        let categoryArray = response?.data.map(item => item.category);
+        navigation.navigate('UserBooks', {
+          categoryArray: categoryArray,
+        });
+        // const isPurchased = response?.data?.some(
+        //   item => item.category_id === category_data?.id,
+        // );
+        // setIsPurchased(isPurchased);
+      }
+    } catch (error) {
+      console.log('🚀 ~ handleGetPaymentHistory ~ error:', error?.message);
+
+      Snackbar.show({
+        text: error.message,
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   function handleEditProfile() {
     navigation.navigate('Profile');
   }
@@ -350,7 +382,11 @@ const ProfileMenu = ({navigation}) => {
           justifyContent: 'center',
           alignSelf: 'center',
         }}>
-        <TouchableOpacity onPress={() => navigation.navigate('BookBundles')}>
+        <TouchableOpacity
+          onPress={() =>
+            // navigation.navigate('UserBooks')
+            getUserPaymentDetails()
+          }>
           <List.Item
             title="My Books"
             titleStyle={{

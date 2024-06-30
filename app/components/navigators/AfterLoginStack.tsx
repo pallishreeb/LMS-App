@@ -23,6 +23,7 @@ import Login from '../../screens/beforeLogin/login/Login';
 import Otp from '../../screens/beforeLogin/otp/Otp';
 import Settings from '../../screens/afterLogin/Settings/Settings';
 import SignUp from '../../screens/beforeLogin/signUp/SignUp';
+import UserBooks from '../../screens/afterLogin/UserBooks/UserBooks';
 
 const Stack = createStackNavigator();
 const AfterLoginStack = route => {
@@ -56,11 +57,11 @@ const AfterLoginStack = route => {
         component={Settings}
         options={{headerShown: false}}
       />
-      {/* <Stack.Screen
-        name="SignUp"
-        component={SignUp}
+      <Stack.Screen
+        name="UserBooks"
+        component={UserBooks}
         options={{headerShown: false}}
-      /> */}
+      />
       <Stack.Screen
         name="BookVideos"
         component={BookVideos}
@@ -130,6 +131,11 @@ const AfterLoginStack = route => {
       <Stack.Screen
         name="ProfileMenu"
         component={ProfileMenu}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="SignUp"
+        component={SignUp}
         options={{headerShown: false}}
       />
       <Stack.Screen

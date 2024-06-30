@@ -23,8 +23,12 @@ const Otp = ({navigation, route}) => {
   const [res, setRes] = useState({});
   const [currentOtp, setCurrentOtp] = useState('');
   async function onAlertOK(params: type) {
-    navigation.navigate('Home');
-    await AsyncStorage.setItem('loginType', 'mannual');
+    if (previousRoute == 'signup') {
+      navigation.navigate('Login');
+    } else {
+      await AsyncStorage.setItem('loginType', 'mannual');
+      navigation?.navigate('Home');
+    }
   }
   const handleVerifyOtp = async () => {
     try {
@@ -81,7 +85,7 @@ const Otp = ({navigation, route}) => {
         <CustomText type={'textRegular'} style={{marginTop: fp(1)}}>
           Please type the verification code
         </CustomText>
-        <CustomText type={'textRegular'}>send to {phoneNo}</CustomText>
+        <CustomText type={'textRegular'}>send to {email}</CustomText>
       </View>
       <View style={{alignItems: 'center'}}>
         <OtpInput

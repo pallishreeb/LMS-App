@@ -31,6 +31,7 @@ const PdfBooks = ({navigation, route}) => {
   // const [status, setStatus] = useState('download');
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchased, setIsPurchased] = useState(false);
+  const [isApproved, setIsApproved] = useState('pending');
   const [progress, setProgress] = useState(0);
   const [filePath, setFilePath] = useState('');
   const [res, setRes] = useState([]);
@@ -63,10 +64,15 @@ const PdfBooks = ({navigation, route}) => {
         `${endpoints.GET_PAYMENT_HISTORY_BY_USER_ID}${user_id}`,
       );
       if (response.status === 200) {
+        console.log(response?.data, 'payment history');
         const isPurchased = response?.data?.some(
           item => item.category_id === category_data?.id,
         );
+        const UserPresent = response?.data.find(
+          item => item.user_id === user_id,
+        );
         setIsPurchased(isPurchased);
+        setIsApproved(UserPresent?.status);
       }
     } catch (error) {
       console.log('🚀 ~ handleGetPaymentHistory ~ error:', error?.message);
@@ -122,6 +128,7 @@ const PdfBooks = ({navigation, route}) => {
   const checkFileStatus = async item => {
     try {
       const pdfUrl = item?.pdf_book;
+      console.log('🚀 ~ checkFileStatus ~ pdfUrl:', pdfUrl);
 
       if (!pdfUrl) {
         console.error('PDF URL is not provided.');
@@ -134,17 +141,18 @@ const PdfBooks = ({navigation, route}) => {
       );
       const cacheDir = RNFetchBlob.fs.dirs.CacheDir;
       const filePath = `${cacheDir}/${fileNameWithExtension}`;
+      let newFilePath = filePath.replace(/%/g, '_');
+      console.log('🚀 ~ checkFileStatus ~ newFilePath:', newFilePath);
       const previousLink = await AsyncStorage.getItem(item?.title);
-      console.log(
-        '🚀 ~ checkFileStatus ~ previousLink:',
-        item?.title,
-        previousLink,
-      );
-      const fileExists = await RNFetchBlob.fs.exists(filePath);
+      console.log('🚀 ~ checkFileStatus ~ filePath:', filePath);
+      console.log('🚀 ~ checkFileStatus ~ previousLink:', previousLink);
+      const fileExists = await RNFetchBlob.fs.exists(newFilePath);
+      console.log('🚀 ~ checkFileStatus ~ filePath:', filePath);
+      console.log('🚀 ~ checkFileStatus ~ fileExists:', fileExists);
 
       let status;
       if (fileExists) {
-        if (!previousLink || previousLink !== filePath) {
+        if (!previousLink || previousLink !== newFilePath) {
           status = 'update';
         } else {
           status = 'read';
@@ -157,7 +165,6 @@ const PdfBooks = ({navigation, route}) => {
         }
       }
 
-      await AsyncStorage.setItem(item?.title, filePath);
       return {[item.id]: status};
     } catch (error) {
       console.error('🚀 ~ checkFileStatus ~ Error:', error);
@@ -177,13 +184,15 @@ const PdfBooks = ({navigation, route}) => {
 
     const cacheDir = RNFetchBlob.fs.dirs.CacheDir;
     const filePath = `${cacheDir}/${fileNameWithExtension}`;
+    let newFilePath = filePath.replace(/%/g, '_');
+    console.log('🚀 ~ downloadPdf ~ newFilePath:', newFilePath);
 
     try {
       // Download the PDF
       let downloadedSize = 0; // Initialize downloaded size to 0
 
       const res = await RNFetchBlob.config({
-        path: filePath,
+        path: newFilePath,
       })
         .fetch('GET', pdfUrl)
         .progress((received, total) => {
@@ -200,8 +209,8 @@ const PdfBooks = ({navigation, route}) => {
           duration: 2000,
           backgroundColor: color.PRIMARY_BLUE,
         });
-        setFilePath(filePath);
-        await AsyncStorage.setItem(item?.title, filePath);
+        setFilePath(newFilePath);
+        await AsyncStorage.setItem(item?.title, newFilePath);
         setStatuses({
           ...statuses,
           [item.id]: 'read',
@@ -260,6 +269,7 @@ const PdfBooks = ({navigation, route}) => {
     if (status === 'download') {
       downloadPdf(item);
     } else if (status === 'read') {
+      console.log('🚀 ~ handleButtonPress ~ item:', item);
       navigation.navigate('PdfViewer', {BookDetails: item});
     } else if (status === 'update') {
       downloadPdf(item);
@@ -286,6 +296,7 @@ const PdfBooks = ({navigation, route}) => {
             </>
           )}
           {status !== 'downloading' &&
+            // isApproved == 'approved' &&
             item?.status == 'Completed' &&
             isPurchased && (
               <View style={styles.buttonContainer}>
@@ -500,7 +511,7 @@ const styles = StyleSheet.create({
     fontFamily: typography.Inter_Medium,
     marginTop: hp(0.5),
     marginLeft: wp(3),
-    width: wp(55),
+    width: wp(50),
   },
   // progressBar: {
   //   marginTop: hp(1),

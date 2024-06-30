@@ -961,7 +961,7 @@ const BookVideos: React.FC = ({navigation, route}) => {
       {!isLandscape ? (
         <>
           <Header
-            title={'About Book'}
+            title={'Video'}
             backgroundColor={color.PRIMARY_BLUE}
             font={'regular'}
             leftIconName={'leftArrow'}

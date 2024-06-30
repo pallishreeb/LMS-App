@@ -32,6 +32,7 @@ import {ImageAsset, ProfileData} from '../../../constants/types/profile';
 import {apiClient} from '../../../helpers/apiClient';
 import ImagePicker from 'react-native-image-crop-picker';
 import {useFocusEffect} from '@react-navigation/native';
+import {EditProfile} from '../../../assets/ProfileMenu';
 
 const Profile = ({navigation}) => {
   const [name, setName] = useState('');
@@ -366,7 +367,7 @@ const Profile = ({navigation}) => {
             />
           ) : (
             <Image
-              source={DummyProfImg}
+              source={EditProfile}
               style={{
                 height: fp(14),
                 width: fp(14),
