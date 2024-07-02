@@ -133,11 +133,11 @@ const AfterLoginStack = route => {
         component={ProfileMenu}
         options={{headerShown: false}}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="SignUp"
         component={SignUp}
         options={{headerShown: false}}
-      />
+      /> */}
       <Stack.Screen
         name="AnalogPaymentForm"
         component={AnalogPaymentForm}
@@ -153,12 +153,12 @@ const AfterLoginStack = route => {
         component={BookBundles}
         options={{headerShown: false}}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="Login"
         component={Login}
         options={{headerShown: false}}
       />
-      <Stack.Screen name="Otp" component={Otp} options={{headerShown: false}} />
+      <Stack.Screen name="Otp" component={Otp} options={{headerShown: false}} /> */}
     </Stack.Navigator>
   );
 };

@@ -274,14 +274,6 @@ const Login = ({navigation}) => {
   const dispatch = useDispatch();
   async function onAlertOK(data) {
     console.log('🚀 ~ onAlertOK ~ data:', data);
-    dispatch(
-      login({
-        userName: data?.name,
-        userEmail: data?.email,
-      }),
-    );
-
-    await AsyncStorage.setItem('loginType', 'mannual');
   }
   function onOtpOkPress(response) {
     navigation.navigate('Otp', {
@@ -304,8 +296,9 @@ const Login = ({navigation}) => {
       });
       console.log(response.status, 'response.status');
       if (response.status === 200) {
-        console.log(response?.data);
+        console.log(response?.data, 'react-native');
         setRes(response.data);
+        await AsyncStorage.setItem('loginType', 'mannual');
         await AsyncStorage.setItem('token', response?.data?.token);
         await AsyncStorage.setItem(
           'user_id',
@@ -315,7 +308,14 @@ const Login = ({navigation}) => {
           Alert.alert('Information', `${response.data.message}`, [
             {
               text: 'Ok',
-              onPress: () => onAlertOK(response?.data?.data),
+              // onPress: () => onAlertOK(response?.data?.data),
+              onPress: () =>
+                dispatch(
+                  login({
+                    userName: response?.data?.name,
+                    userEmail: response?.data?.email,
+                  }),
+                ),
               style: 'default',
             },
           ]);

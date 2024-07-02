@@ -68,11 +68,13 @@ const PdfBooks = ({navigation, route}) => {
         const isPurchased = response?.data?.some(
           item => item.category_id === category_data?.id,
         );
-        const UserPresent = response?.data.find(
-          item => item.user_id === user_id,
-        );
+
         setIsPurchased(isPurchased);
-        setIsApproved(UserPresent?.status);
+        setIsApproved(response?.data[0]?.status);
+        console.log(
+          '🚀 ~ handleGetPaymentHistory ~ response?.data?.status:',
+          response?.data[0]?.status,
+        );
       }
     } catch (error) {
       console.log('🚀 ~ handleGetPaymentHistory ~ error:', error?.message);
@@ -128,7 +130,6 @@ const PdfBooks = ({navigation, route}) => {
   const checkFileStatus = async item => {
     try {
       const pdfUrl = item?.pdf_book;
-      console.log('🚀 ~ checkFileStatus ~ pdfUrl:', pdfUrl);
 
       if (!pdfUrl) {
         console.error('PDF URL is not provided.');
@@ -142,13 +143,8 @@ const PdfBooks = ({navigation, route}) => {
       const cacheDir = RNFetchBlob.fs.dirs.CacheDir;
       const filePath = `${cacheDir}/${fileNameWithExtension}`;
       let newFilePath = filePath.replace(/%/g, '_');
-      console.log('🚀 ~ checkFileStatus ~ newFilePath:', newFilePath);
       const previousLink = await AsyncStorage.getItem(item?.title);
-      console.log('🚀 ~ checkFileStatus ~ filePath:', filePath);
-      console.log('🚀 ~ checkFileStatus ~ previousLink:', previousLink);
       const fileExists = await RNFetchBlob.fs.exists(newFilePath);
-      console.log('🚀 ~ checkFileStatus ~ filePath:', filePath);
-      console.log('🚀 ~ checkFileStatus ~ fileExists:', fileExists);
 
       let status;
       if (fileExists) {
@@ -296,7 +292,7 @@ const PdfBooks = ({navigation, route}) => {
             </>
           )}
           {status !== 'downloading' &&
-            // isApproved == 'approved' &&
+            isApproved == 'approved' &&
             item?.status == 'Completed' &&
             isPurchased && (
               <View style={styles.buttonContainer}>

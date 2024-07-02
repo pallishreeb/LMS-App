@@ -33,6 +33,8 @@ import {
 } from '../../../../assets/ProfileMenu';
 import {useIcon} from '../../../../assets/icons/useIcon';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {useDispatch} from 'react-redux';
+import {logout} from '../../../../redux/authSlice';
 
 const ProfileMenu = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -70,38 +72,40 @@ const ProfileMenu = ({navigation}) => {
     handleGetProfile();
   }, []);
 
-  const getUserPaymentDetails = async () => {
-    try {
-      const user_id = await AsyncStorage.getItem('user_id');
-      console.log('🚀 ~ handleGetPaymentHistory ~ user_id:', user_id);
-      setIsLoading(true);
-      const response = await apiClient.get(
-        `${endpoints.GET_PAYMENT_HISTORY_BY_USER_ID}${user_id}`,
-      );
-      if (response.status === 200) {
-        console.log(response.data);
-        let categoryArray = response?.data.map(item => item.category);
-        navigation.navigate('UserBooks', {
-          categoryArray: categoryArray,
-        });
-        // const isPurchased = response?.data?.some(
-        //   item => item.category_id === category_data?.id,
-        // );
-        // setIsPurchased(isPurchased);
-      }
-    } catch (error) {
-      console.log('🚀 ~ handleGetPaymentHistory ~ error:', error?.message);
+  // const getUserPaymentDetails = async () => {
+  //   try {
+  //     const user_id = await AsyncStorage.getItem('user_id');
+  //     console.log('🚀 ~ handleGetPaymentHistory ~ user_id:', user_id);
+  //     setIsLoading(true);
+  //     const response = await apiClient.get(
+  //       `${endpoints.GET_PAYMENT_HISTORY_BY_USER_ID}${user_id}`,
+  //     );
+  //     if (response.status === 200) {
+  //       console.log(response.data);
+  //       let categoryArray = response?.data.map(item => item.category);
+  //       navigation.navigate('UserBooks', {
+  //         categoryArray: categoryArray,
+  //       });
+  //       // const isPurchased = response?.data?.some(
+  //       //   item => item.category_id === category_data?.id,
+  //       // );
+  //       // setIsPurchased(isPurchased);
+  //     }
+  //   } catch (error) {
+  //     console.log('🚀 ~ handleGetPaymentHistory ~ error:', error?.message);
 
-      Snackbar.show({
-        text: error.message,
-        duration: 2000,
-        backgroundColor: color.RED,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  //     Snackbar.show({
+  //       text: error.message,
+  //       duration: 2000,
+  //       backgroundColor: color.RED,
+  //     });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+  function getUserPaymentDetails(params: type) {
+    navigation.navigate('BookBundles');
+  }
   function handleEditProfile() {
     navigation.navigate('Profile');
   }
@@ -128,6 +132,7 @@ const ProfileMenu = ({navigation}) => {
       ],
     );
   }
+  const dispatch = useDispatch();
   async function OnSignOutAlertOK() {
     GoogleSignin.configure({
       webClientId:
@@ -139,12 +144,15 @@ const ProfileMenu = ({navigation}) => {
       await GoogleSignin.revokeAccess();
       await GoogleSignin.signOut();
       await AsyncStorage.clear();
-      navigation.navigate('Login');
+      dispatch(logout());
+      // navigation.navigate('Login');
     } else {
       await AsyncStorage.clear();
-      navigation.navigate('Login');
+      dispatch(logout());
+      // navigation.navigate('Login');
     }
   }
+
   function handleSettings() {
     navigation.navigate('Settings');
   }
@@ -190,7 +198,7 @@ const ProfileMenu = ({navigation}) => {
             />
           ) : (
             <Image
-              source={DummyProfImg}
+              source={EditProfile}
               style={{
                 height: fp(14),
                 width: fp(14),

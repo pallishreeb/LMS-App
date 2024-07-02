@@ -44,4 +44,17 @@ export const styles = StyleSheet.create({
   illustrationImg: {height: fp(30), width: fp(40), marginTop: hp(3)},
   underline: {textDecorationLine: 'underline'},
   btnContainer: {alignItems: 'center', marginTop: hp(6)},
+  button: {
+    backgroundColor: 'transparent',
+    paddingLeft: wp(12),
+    paddingRight: wp(12),
+    paddingTop: wp(3),
+    paddingBottom: wp(3),
+    borderRadius: 5,
+    borderColor: 'rgba(248,248,248,0.3)',
+    borderWidth: 2,
+    // alignItems: 'center',
+    alignSelf: 'center',
+    marginTop: hp(2),
+  },
 });

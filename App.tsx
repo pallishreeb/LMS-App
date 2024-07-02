@@ -17,33 +17,28 @@ export default function App() {
       SplashScreen.hide();
     }, 3000);
   }, []);
+
   useEffect(() => {
     Orientation.lockToPortrait; // Lock the app to landscape orientation
     return () => {
       Orientation.unlockAllOrientations(); // Ensure orientation is unlocked when component unmounts
     };
   }, []);
-  const [isLogged, setIsLogged] = React.useState('');
-  const [token, setToken] = React.useState('');
-  const [isloading, setIsLoading] = React.useState(false);
-  async function getLoggedIn() {
-    setIsLoading(true);
-    const token = await AsyncStorage.getItem('token');
-    console.log('🚀 ~ getLoggedIn ~ token:', token);
-    setToken(token);
-    if (token == '') {
-      setIsLoading(true);
-    } else {
-      setIsLoading(false);
-    }
-  }
-  useEffect(() => {
-    getLoggedIn();
-  }, []);
 
   return (
     <Provider store={store}>
-      <RootNavigation />
+      <AppContent />
     </Provider>
   );
 }
+const AppContent = () => {
+  // Assuming you have a logged-in state in your Redux store
+  const isLoggedIn = useSelector(state => state.auth.isLoggedIn); // Replace with your actual state
+
+  useEffect(() => {
+    // Add a side-effect to log the current login state
+    console.log('Login state changed:', isLoggedIn);
+  }, [isLoggedIn]);
+
+  return <RootNavigation isLoggedIn={isLoggedIn} />;
+};

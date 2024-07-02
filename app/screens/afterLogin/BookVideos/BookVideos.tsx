@@ -40,6 +40,7 @@ import {dislike, like} from '../../../redux/likeSlice';
 import DislikeButton from '../../../components/LikeButton/DislikeButton';
 import CommentButton from '../../../components/LikeButton/CommentButton';
 import {useNavigationState} from '@react-navigation/native';
+import {EditProfile} from '../../../assets/ProfileMenu';
 const BookVideos: React.FC = ({navigation, route}) => {
   const {BookDetails, VideoUri} = route.params;
   console.log('🚀 ~ VideoUri:', VideoUri);
@@ -591,7 +592,7 @@ const BookVideos: React.FC = ({navigation, route}) => {
           width: wp(20),
         }}>
         <Image
-          source={DummyProfImg}
+          source={EditProfile}
           style={{height: fp(6), width: fp(6), marginTop: hp(2)}}
           resizeMode="contain"
         />
@@ -686,7 +687,7 @@ const BookVideos: React.FC = ({navigation, route}) => {
             width: wp(20),
           }}>
           <Image
-            source={DummyProfImg}
+            source={EditProfile}
             style={{height: fp(6), width: fp(6), marginTop: hp(2)}}
             resizeMode="contain"
           />

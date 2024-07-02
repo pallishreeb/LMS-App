@@ -12,6 +12,7 @@ import {
   SendComment,
 } from '../../assets/images';
 import {fp, hp, wp} from '../../helpers/resDimension';
+import {EditProfile} from '../../assets/ProfileMenu';
 
 const CommentInput = ({
   refInput,
@@ -25,7 +26,7 @@ const CommentInput = ({
   return (
     <View style={styles.container}>
       <Image
-        source={DummyProfImg}
+        source={EditProfile}
         style={styles.profileImage}
         resizeMode="contain"
       />

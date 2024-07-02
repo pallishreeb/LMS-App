@@ -9,6 +9,7 @@ import React from 'react';
 import {DummyProfImg, SendComment} from '../../assets/images';
 import {fp, hp, wp} from '../../helpers/resDimension';
 import {Image} from 'react-native';
+import {EditProfile} from '../../assets/ProfileMenu';
 
 const CommentReplyInput = ({
   refReplyInput,
@@ -27,7 +28,7 @@ const CommentReplyInput = ({
         marginBottom: hp(1),
       }}>
       <Image
-        source={DummyProfImg}
+        source={EditProfile}
         style={{height: fp(3.6), width: fp(3.6), marginTop: hp(2)}}
         resizeMode="contain"
       />
