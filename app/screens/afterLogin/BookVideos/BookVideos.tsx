@@ -43,7 +43,6 @@ import {useNavigationState} from '@react-navigation/native';
 import {EditProfile} from '../../../assets/ProfileMenu';
 const BookVideos: React.FC = ({navigation, route}) => {
   const {BookDetails, VideoUri} = route.params;
-  console.log('🚀 ~ VideoUri:', VideoUri);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [commentText, SetCommentText] = useState('');
@@ -548,6 +547,7 @@ const BookVideos: React.FC = ({navigation, route}) => {
       setIsLoading(false);
     }
   }
+
   function handleCommentEdit(item) {
     refInput.current?.focus();
     setEditCommentFlow(true);
@@ -582,6 +582,7 @@ const BookVideos: React.FC = ({navigation, route}) => {
     return Math.ceil(differenceInDays);
   }
   function renderCommentReply({item}) {
+    console.log('🚀 ~ renderCommentReply ~ item:', item);
     const timeAgo = returnCommentCreatedTime(item?.created_at);
     return (
       <View
@@ -1055,92 +1056,6 @@ const BookVideos: React.FC = ({navigation, route}) => {
         </View>
         {/* </View> */}
 
-        {showAddPhotoModal ? (
-          <Pressable
-            onPress={() => setShowAddPhotoModal(false)}
-            style={{
-              position: 'absolute',
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: hp(100),
-              width: wp(100),
-              backgroundColor: 'rgba(0, 0, 0, 0.3)',
-              // backgroundColor: 'red',
-            }}>
-            <View
-              style={{
-                height: hp(28),
-                width: wp(75),
-                borderRadius: fp(2),
-                position: 'absolute',
-                backgroundColor: 'white',
-                // bottom: 0,
-                top: hp(20),
-                marginHorizontal: wp(10),
-                alignSelf: 'center',
-                // left: 0,
-                // right: 0,
-              }}>
-              <CustomText
-                type={'typeRegular'}
-                style={{
-                  fontFamily: typography.Inter_Bold,
-                  fontSize: fp(2.2),
-                  color: color.PRIMARY_BLUE,
-                  // marginTop: hp(1),
-                  padding: fp(2),
-                }}>
-                Add Photo
-              </CustomText>
-              <View
-                style={{borderTopWidth: fp(0.2), borderColor: color.GREY}}
-              />
-              <CustomText
-                type={'typeRegular'}
-                onPress={handleOpenCamera}
-                style={{
-                  fontFamily: typography.Inter_Medium,
-                  fontSize: fp(2),
-                  color: '#555555',
-                  // marginTop: hp(1),
-                  padding: fp(2),
-                }}>
-                Camera
-              </CustomText>
-              <View
-                style={{borderTopWidth: fp(0.1), borderColor: color.GREY}}
-              />
-              <CustomText
-                onPress={handleOpenGallery}
-                type={'typeRegular'}
-                style={{
-                  fontFamily: typography.Inter_Medium,
-                  fontSize: fp(2),
-                  color: '#555555',
-                  // marginTop: hp(1),
-                  padding: fp(2),
-                }}>
-                Gallery
-              </CustomText>
-              <View
-                style={{borderTopWidth: fp(0.1), borderColor: color.GREY}}
-              />
-              <CustomText
-                type={'typeRegular'}
-                style={{
-                  fontFamily: typography.Inter_Medium,
-                  fontSize: fp(2),
-                  color: '#555555',
-                  // marginTop: hp(1),
-                  padding: fp(2),
-                }}>
-                Close
-              </CustomText>
-            </View>
-          </Pressable>
-        ) : null}
-
         {/* {
           showCommentAlert &&
             Snackbar.show({
@@ -1159,6 +1074,86 @@ const BookVideos: React.FC = ({navigation, route}) => {
           style={styles.loadingIndicator}
         />
       )}
+
+      {showAddPhotoModal ? (
+        <Pressable
+          onPress={() => setShowAddPhotoModal(false)}
+          style={{
+            position: 'absolute',
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            width: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            // backgroundColor: 'red',
+          }}>
+          <View
+            style={{
+              height: hp(28),
+              width: wp(75),
+              borderRadius: fp(2),
+              position: 'absolute',
+              backgroundColor: 'white',
+              // bottom: 0,
+              top: hp(20),
+              marginHorizontal: wp(10),
+              alignSelf: 'center',
+              // left: 0,
+              // right: 0,
+            }}>
+            <CustomText
+              type={'typeRegular'}
+              style={{
+                fontFamily: typography.Inter_Bold,
+                fontSize: fp(2.2),
+                color: color.PRIMARY_BLUE,
+                // marginTop: hp(1),
+                padding: fp(2),
+              }}>
+              Add Photo
+            </CustomText>
+            <View style={{borderTopWidth: fp(0.2), borderColor: color.GREY}} />
+            <CustomText
+              type={'typeRegular'}
+              onPress={handleOpenCamera}
+              style={{
+                fontFamily: typography.Inter_Medium,
+                fontSize: fp(2),
+                color: '#555555',
+                // marginTop: hp(1),
+                padding: fp(2),
+              }}>
+              Camera
+            </CustomText>
+            <View style={{borderTopWidth: fp(0.1), borderColor: color.GREY}} />
+            <CustomText
+              onPress={handleOpenGallery}
+              type={'typeRegular'}
+              style={{
+                fontFamily: typography.Inter_Medium,
+                fontSize: fp(2),
+                color: '#555555',
+                // marginTop: hp(1),
+                padding: fp(2),
+              }}>
+              Gallery
+            </CustomText>
+            <View style={{borderTopWidth: fp(0.1), borderColor: color.GREY}} />
+            <CustomText
+              type={'typeRegular'}
+              style={{
+                fontFamily: typography.Inter_Medium,
+                fontSize: fp(2),
+                color: '#555555',
+                // marginTop: hp(1),
+                padding: fp(2),
+              }}>
+              Close
+            </CustomText>
+          </View>
+        </Pressable>
+      ) : null}
     </View>
   );
 };

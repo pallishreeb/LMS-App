@@ -29,7 +29,7 @@ const DropDown = ({
         fontSize: fp(1.8),
       }}
       selectedTextStyle={{
-        color: '#565555',
+        color: 'rgba(0,0,0,0.8)',
         fontFamily: typography.Inter_Medium,
         fontSize: fp(1.8),
       }}
@@ -39,7 +39,7 @@ const DropDown = ({
       }}
       itemTextStyle={{
         padding: hp(0),
-        color: '#555555',
+        color: 'rgba(0,0,0,0.8)',
         paddingHorizontal: wp(0), // Adjust padding as needed
         paddingVertical: hp(0), // Adjust padding as needed
         marginVertical: hp(0),

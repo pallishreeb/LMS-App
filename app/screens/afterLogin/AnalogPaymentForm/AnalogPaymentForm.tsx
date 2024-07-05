@@ -3,6 +3,7 @@ import {
   Alert,
   Image,
   ImageBackground,
+  Modal,
   PermissionsAndroid,
   Pressable,
   ScrollView,
@@ -31,6 +32,9 @@ import {BASE_URL} from '../../../constants/storageKeys';
 import DropDown from '../../../components/DropDownComponent/DropDown';
 import Clipboard from '@react-native-clipboard/clipboard';
 import {useIcon} from '../../../assets/icons/useIcon';
+import CustomAlert from '../../../components/alerts/CustomAlert';
+import {PaymentAlertIllus} from '../../../assets/images';
+import LottieView from 'lottie-react-native';
 
 const AnalogPaymentForm = ({route, navigation}) => {
   const {category_data} = route.params;
@@ -61,6 +65,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
   const [allUpazilla, setAllUpazilla] = useState([]);
   const [isUpazillaFocus, setIsUpazillaFocus] = useState(false);
   const [imageResponse, setImageResponse] = useState<ImageAsset | {}>({});
+  const [showPaymentAlert, setShowPaymentAlert] = useState(false);
 
   function handleSendPress() {
     // Check if pic is available
@@ -72,7 +77,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
       });
       return; // Exit the function if pic is not available
     }
-    // Check for other form data values
+    // // Check for other form data values
     if (
       !division ||
       !district ||
@@ -84,7 +89,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
       !studentName ||
       !paymentNumber
     ) {
-      // If any of the form data values are missing, show an alert
+      //   // If any of the form data values are missing, show an alert
       Snackbar.show({
         text: 'Please fill all the fields',
         duration: 2000,
@@ -106,6 +111,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
     setLoading(true);
     const formData = new FormData();
     formData.append('payment_number', paymentNumber);
+    formData.append('payment_method', paymentMode);
     {
       Object.keys(imageResponse).length > 0 &&
         formData.append('payment_screenshot', {
@@ -136,14 +142,18 @@ const AnalogPaymentForm = ({route, navigation}) => {
     });
 
     if (response?.status == 201) {
-      Alert.alert(
-        'Information',
-        'Your details have been successfully saved. We will contact you once they have been verified.',
-        [{text: 'OK', onPress: () => navigation.goBack()}],
-      );
-      console.log('🚀 ~ handleSumbitAnalogForm ~ response:', response);
+      setShowPaymentAlert(true);
+      // Alert.alert(
+      //   'Information',
+      //   'Your details have been successfully saved. We will contact you once they have been verified.',
+      //   [{text: 'OK', onPress: () => navigation.goBack()}],
+      // );
     } else {
-      Alert.alert('Information', 'Failed to submit details', [{text: 'OK'}]);
+      Snackbar.show({
+        text: 'Uh-oh! Something went wrong. Please try again.',
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
     }
     setLoading(false);
   }
@@ -625,7 +635,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
               width: wp(90),
               borderRadius: fp(1),
               marginTop: hp(1),
-              color: '#565555',
+              color: 'rgba(0,0,0,0.8)',
               padding: wp(2),
             }}
             placeholder="Enter School Name"
@@ -648,7 +658,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
               width: wp(90),
               borderRadius: fp(1),
               marginTop: hp(1),
-              color: '#565555',
+              color: 'rgba(0,0,0,0.8)',
               padding: wp(2),
             }}
             placeholder="Enter Class Name"
@@ -672,7 +682,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
               width: wp(90),
               borderRadius: fp(1),
               marginTop: hp(1),
-              color: '#565555',
+              color: 'rgba(0,0,0,0.8)',
               padding: wp(2),
             }}
             placeholder="Enter Student Name"
@@ -695,7 +705,7 @@ const AnalogPaymentForm = ({route, navigation}) => {
               width: wp(90),
               borderRadius: fp(1),
               marginTop: hp(1),
-              color: '#565555',
+              color: 'rgba(0,0,0,0.8)',
               padding: wp(2),
             }}
             placeholder="Enter Your Mobile Number"
@@ -712,29 +722,29 @@ const AnalogPaymentForm = ({route, navigation}) => {
             }}>
             Amount
           </Text>
-          <Text
+          {/* <Text
             style={{
               // backgroundColor: 'rgba(54,75,159,0.2)',
               width: wp(90),
               borderRadius: fp(1),
               marginTop: hp(4),
-              color: '#565555',
+              color: 'rgba(0,0,0,0.8)',
               padding: wp(2),
               position: 'absolute',
             }}>
             ৳
-          </Text>
+          </Text> */}
           <TextInput
             style={{
               backgroundColor: 'rgba(54,75,159,0.2)',
               width: wp(90),
               borderRadius: fp(1),
               marginTop: hp(1),
-              color: '#565555',
+              color: 'rgba(0,0,0,0.8)',
               padding: wp(2),
-              paddingLeft: wp(5),
+              // paddingLeft: wp(5),
             }}
-            placeholder="1200"
+            placeholder="Enter Amout"
             placeholderTextColor="#565555"
             onChangeText={handleAmount}
             keyboardType="number-pad"
@@ -830,6 +840,27 @@ const AnalogPaymentForm = ({route, navigation}) => {
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
       )}
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showPaymentAlert}
+        onRequestClose={() => setShowPaymentAlert(false)}>
+        <CustomAlert
+          title=""
+          subTitle="Your details have been successfully saved. We will contact you once they have been verified."
+          img={PaymentAlertIllus}
+          isImg={false}
+          onPress={() => {
+            setShowPaymentAlert(false);
+            navigation.goBack();
+          }}
+          onClosePress={() => {
+            setShowPaymentAlert(false);
+          }}
+          btnTitle={'Done'}
+        />
+      </Modal>
     </View>
   );
 };

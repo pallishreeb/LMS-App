@@ -3,6 +3,8 @@ export const endpoints = {
   VERIFY_OTP: 'auth/verify-otp',
   LOGIN: 'auth/login',
   GOOGLE_SIGNIN: 'auth/google/callback',
+  REQUEST_OTP: 'auth/request-otp',
+  RESET_PASS: 'auth/reset-password',
 
   //~  AFTER AUTH
   GET_CATEGORIES: 'categories',

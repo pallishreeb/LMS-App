@@ -14,6 +14,7 @@ import {
   DummyProfImg,
   FullBg,
   MyBooks,
+  UserIcon,
   headerBg,
 } from '../../../../assets/images';
 import {typography} from '../../../../assets/fonts/typography';
@@ -33,7 +34,7 @@ import {
 } from '../../../../assets/ProfileMenu';
 import {useIcon} from '../../../../assets/icons/useIcon';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {logout} from '../../../../redux/authSlice';
 
 const ProfileMenu = ({navigation}) => {
@@ -72,40 +73,45 @@ const ProfileMenu = ({navigation}) => {
     handleGetProfile();
   }, []);
 
-  // const getUserPaymentDetails = async () => {
-  //   try {
-  //     const user_id = await AsyncStorage.getItem('user_id');
-  //     console.log('🚀 ~ handleGetPaymentHistory ~ user_id:', user_id);
-  //     setIsLoading(true);
-  //     const response = await apiClient.get(
-  //       `${endpoints.GET_PAYMENT_HISTORY_BY_USER_ID}${user_id}`,
-  //     );
-  //     if (response.status === 200) {
-  //       console.log(response.data);
-  //       let categoryArray = response?.data.map(item => item.category);
-  //       navigation.navigate('UserBooks', {
-  //         categoryArray: categoryArray,
-  //       });
-  //       // const isPurchased = response?.data?.some(
-  //       //   item => item.category_id === category_data?.id,
-  //       // );
-  //       // setIsPurchased(isPurchased);
-  //     }
-  //   } catch (error) {
-  //     console.log('🚀 ~ handleGetPaymentHistory ~ error:', error?.message);
+  const getUserPaymentDetails = async () => {
+    try {
+      const user_id = await AsyncStorage.getItem('user_id');
+      console.log('🚀 ~ handleGetPaymentHistory ~ user_id:', user_id);
+      setIsLoading(true);
+      const response = await apiClient.get(
+        `${endpoints.GET_PAYMENT_HISTORY_BY_USER_ID}${user_id}`,
+      );
+      if (response.status === 200) {
+        console.log(response.data);
+        let categoryArray = response?.data.map(item => item.category);
+        console.log(
+          '🚀 ~ getUserPaymentDetails ~ categoryArray:',
+          categoryArray,
+        );
+        navigation.navigate('UserBooks', {
+          categoryArray: categoryArray,
+        });
+        // const isPurchased = response?.data?.some(
+        //   item => item.category_id === category_data?.id,
+        // );
+        // setIsPurchased(isPurchased);
+      }
+    } catch (error) {
+      console.log('🚀 ~ handleGetPaymentHistory ~ error:', error?.message);
 
-  //     Snackbar.show({
-  //       text: error.message,
-  //       duration: 2000,
-  //       backgroundColor: color.RED,
-  //     });
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-  function getUserPaymentDetails(params: type) {
-    navigation.navigate('BookBundles');
-  }
+      Snackbar.show({
+        text: error.message,
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  // function getUserPaymentDetails(params: type) {
+
+  // navigation.navigate('BookBundles');
+  // }
   function handleEditProfile() {
     navigation.navigate('Profile');
   }
@@ -133,6 +139,9 @@ const ProfileMenu = ({navigation}) => {
     );
   }
   const dispatch = useDispatch();
+  let type = '';
+  const isLoggedIn = useSelector(state => state.auth.isLoggedIn); // Replace with your actual state
+  console.log('🚀 ~ isLoggedIn:', isLoggedIn);
   async function OnSignOutAlertOK() {
     GoogleSignin.configure({
       webClientId:
@@ -140,19 +149,27 @@ const ProfileMenu = ({navigation}) => {
       offlineAccess: true,
     });
     const loginType = await AsyncStorage.getItem('loginType');
+    console.log('🚀 ~ OnSignOutAlertOK ~ loginType:', loginType);
+
     if (loginType == 'google') {
+      console.log('google sign out');
+      dispatch(logout());
       await GoogleSignin.revokeAccess();
       await GoogleSignin.signOut();
+
       await AsyncStorage.clear();
-      dispatch(logout());
+      console.log('🚀 ~ OnSignOutAlertOK ~ inside google logout:', loginType);
       // navigation.navigate('Login');
     } else {
-      await AsyncStorage.clear();
+      console.log('mannual sign out');
       dispatch(logout());
+      await AsyncStorage.clear();
+      console.log('🚀 ~ OnSignOutAlertOK ~ inside mannual logout:', loginType);
       // navigation.navigate('Login');
     }
   }
-
+  console.log('🚀 ~ OnSignOutAlertOK ~ type:', type);
+  console.log(userProfile?.profile_image, 'image');
   function handleSettings() {
     navigation.navigate('Settings');
   }
@@ -198,13 +215,14 @@ const ProfileMenu = ({navigation}) => {
             />
           ) : (
             <Image
-              source={EditProfile}
+              source={UserIcon}
               style={{
-                height: fp(14),
-                width: fp(14),
-                borderRadius: fp(10),
+                height: fp(10),
+                width: fp(10),
+                // borderRadius: fp(10),
                 marginTop: hp(3),
               }}
+              resizeMode="contain"
             />
           )}
           <Text

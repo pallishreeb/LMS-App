@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   textRegular: {
     fontFamily: typography.Inter_Regular,
     color: color.DIM_WHITE,
-    fontSize: fp(1.6),
+    fontSize: fp(1.7),
   },
   textBold: {
     fontFamily: typography.Inter_Medium,

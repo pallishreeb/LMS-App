@@ -12,22 +12,58 @@ import MainButton from '../../../components/button/MainButton';
 import {apiClient} from '../../../helpers/apiClient';
 import {endpoints} from '../../../constants/colors/endpoints';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useDispatch} from 'react-redux';
+import {login} from '../../../redux/authSlice';
+import Snackbar from 'react-native-snackbar';
 
 const Otp = ({navigation, route}) => {
-  const {phoneNo, email, previousRoute} = route.params;
-  const handleResendCode = () => {
-    console.log('resend code');
-  };
+  const {phoneNo, email, previousRoute, name} = route.params;
+  const handleResendCode = async () => {
+    try {
+      setIsLoading(true);
+      console.log('🚀 ~ handleResetPassword ~ email:', email);
+      const response = await apiClient.post(endpoints.REQUEST_OTP, {
+        email: email,
+      });
+      if (response.status === 200) {
+        console.log(response?.data);
 
+        Snackbar.show({
+          text: response?.data?.message,
+          duration: 2000,
+          backgroundColor: color.PRIMARY_BLUE,
+        });
+        setIsLoading(false);
+      }
+    } catch (error) {
+      setIsLoading(false);
+      console.log('inside catch', error?.message);
+      Snackbar.show({
+        text: response?.data?.message,
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+      // }
+    }
+  };
+  const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [res, setRes] = useState({});
   const [currentOtp, setCurrentOtp] = useState('');
   async function onAlertOK(params: type) {
     if (previousRoute == 'signup') {
       navigation.navigate('Login');
+    } else if (previousRoute == 'forgetPass') {
+      navigation?.navigate('ResetPass', {email: email, otp: currentOtp});
     } else {
-      await AsyncStorage.setItem('loginType', 'mannual');
-      navigation?.navigate('Home');
+      dispatch(
+        login({
+          userName: name,
+          userEmail: email,
+        }),
+      );
+      //    await AsyncStorage.setItem('loginType', 'mannual');
+      // navigation?.navigate('Home');
     }
   }
   const handleVerifyOtp = async () => {
@@ -44,10 +80,12 @@ const Otp = ({navigation, route}) => {
         setRes(response.data);
         Alert.alert(
           'Information',
-          `otp Verified\n${
+          `Otp Verified\n${
             previousRoute == 'signup'
               ? 'Sign up successful'
-              : 'Login successful'
+              : previousRoute == 'signup'
+              ? 'Login successful'
+              : 'Reset your password.'
           }`,
           [
             {
@@ -73,7 +111,9 @@ const Otp = ({navigation, route}) => {
       setIsLoading(false);
     }
   };
-
+  function handleResetPass() {
+    navigation?.navigate('ResetPass', {email: email, otp: currentOtp});
+  }
   return (
     <KeyboardAwareScrollView style={styles.mainContainer}>
       <StatusBar backgroundColor={color.WHITE} barStyle="light-content" />
@@ -85,7 +125,10 @@ const Otp = ({navigation, route}) => {
         <CustomText type={'textRegular'} style={{marginTop: fp(1)}}>
           Please type the verification code
         </CustomText>
-        <CustomText type={'textRegular'}>send to {email}</CustomText>
+        <CustomText type={'textRegular'}>
+          send to{' '}
+          <Text style={{fontFamily: typography?.Inter_Medium}}>{email}</Text>
+        </CustomText>
       </View>
       <View style={{alignItems: 'center'}}>
         <OtpInput
@@ -119,7 +162,14 @@ const Otp = ({navigation, route}) => {
         />
       </View>
       <View style={styles.btnContainer}>
-        <MainButton _onPress={handleVerifyOtp} _title="Verify Now " />
+        <MainButton
+          _onPress={
+            previousRoute == 'forgetPass' ? handleResetPass : handleVerifyOtp
+          }
+          _title={
+            previousRoute == 'forgetPass' ? 'Reset Password' : 'Verify Now '
+          }
+        />
       </View>
       <View style={styles.bottomText}>
         <CustomText

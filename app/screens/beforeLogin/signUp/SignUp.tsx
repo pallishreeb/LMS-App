@@ -35,6 +35,7 @@ import auth from '@react-native-firebase/auth';
 import {useDispatch} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {login} from '../../../redux/authSlice';
+import TnCFooter from '../../../components/navigators/TnCFooter';
 
 const SignUp = ({navigation}) => {
   const [userName, setUserName] = useState('');
@@ -383,6 +384,7 @@ const SignUp = ({navigation}) => {
           }}
         />
       </TouchableOpacity>
+
       <View style={styles.bottomText}>
         <CustomText type={'textRegular'}>Already have an account? </CustomText>
         <CustomText
@@ -392,6 +394,7 @@ const SignUp = ({navigation}) => {
           Login
         </CustomText>
       </View>
+      <TnCFooter bottom={hp(1)} />
       {/* loading modal */}
       <Modal
         animationType="slide"

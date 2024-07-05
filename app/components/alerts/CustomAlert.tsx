@@ -1,12 +1,14 @@
-import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import {Animated, Image, Pressable, StyleSheet, Text, View} from 'react-native';
+import React, {useEffect, useRef} from 'react';
 import {color} from '../../constants/colors/colors';
 import {fp, hp, wp} from '../../helpers/resDimension';
-import {PaymentAlertIllustration} from '../../assets/images';
+
 import CustomText from '../text/CustomText';
 import ButtonComp from '../button/Button';
 import {useIcon} from '../../assets/icons/useIcon';
-
+import {PaymentAlertIllus} from '../../assets/images';
+import LottieView from 'lottie-react-native';
+import {isDisplayZoomed} from 'react-native-device-info';
 const CustomAlert = ({
   btnTitle,
   title,
@@ -14,7 +16,16 @@ const CustomAlert = ({
   img,
   onPress,
   onClosePress,
+  isImg,
 }) => {
+  const lottieRef = useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    if (lottieRef.current) {
+      lottieRef.current?.play();
+    }
+  }, [lottieRef.current]);
+
   return (
     <View
       style={{
@@ -33,26 +44,48 @@ const CustomAlert = ({
           alignItems: 'center',
         }}>
         {/* <View style={{flexDirection: 'row'}}> */}
-        <Pressable
-          style={{position: 'absolute', top: hp(1), right: wp(2)}}
-          onPress={onClosePress}>
-          {useIcon.CloseIcon()}
-        </Pressable>
+        {isImg ? (
+          <Pressable
+            style={{position: 'absolute', top: hp(1), right: wp(2)}}
+            onPress={onClosePress}>
+            {useIcon.CloseIcon()}
+          </Pressable>
+        ) : null}
 
-        <Image
-          source={img}
-          resizeMode="cover"
-          style={{height: fp(25), width: fp(25), marginTop: hp(2)}}
-        />
+        {isImg ? (
+          <Image
+            source={img}
+            resizeMode="cover"
+            style={{height: fp(25), width: fp(25), marginTop: hp(2)}}
+          />
+        ) : (
+          <LottieView
+            ref={lottieRef}
+            source={require('../../assets/lottie_animations/Animation_smallConfetti.json')}
+            style={{
+              width: '1000%',
+              height: '100%',
+              alignSelf: 'center',
+              justifyContent: 'center',
+              position: 'absolute',
+            }}
+            autoPlay={false}
+            loop={false}
+          />
+        )}
+
         <View style={{marginTop: hp(2)}}>
-          <CustomText
-            bold={true}
-            style={{color: color.PRIMARY_BLUE, fontSize: fp(2)}}>
-            {title}
-          </CustomText>
+          {title ? (
+            <CustomText
+              bold={true}
+              style={{color: color.PRIMARY_BLUE, fontSize: fp(2)}}>
+              {title}
+            </CustomText>
+          ) : null}
+
           <CustomText
             style={{
-              fontSize: fp(1.6),
+              fontSize: isImg ? fp(1.7) : fp(2),
               color: '#727272',
               width: wp(55),
               textAlign: 'center',

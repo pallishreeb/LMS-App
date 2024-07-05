@@ -8,18 +8,14 @@ import {
   View,
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {typography} from '../../../assets/fonts/typography';
-import {BookCoverImg, headerBg} from '../../../assets/images/index';
+import {headerBg} from '../../../assets/images/index';
 import Header from '../../../components/header/Header';
-import SearchTextInput from '../../../components/searchTextInput/SearchTextInput';
-import CustomText from '../../../components/text/CustomText';
 import {color, colorArray} from '../../../constants/colors/colors';
 import {fp, hp, wp} from '../../../helpers/resDimension';
 import {endpoints} from '../../../constants/colors/endpoints';
 import {apiClient} from '../../../helpers/apiClient';
 import Snackbar from 'react-native-snackbar';
 import {FlatList} from 'react-native-gesture-handler';
-import {NavigationContainer} from '@react-navigation/native';
 
 const UserBooks = ({navigation, route}) => {
   const {categoryArray} = route.params;
@@ -161,7 +157,7 @@ const UserBooks = ({navigation, route}) => {
         </Text>
         <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
           <FlatList
-            data={classData}
+            data={categoryArray}
             renderItem={renderClasses}
             numColumns={2}
           />

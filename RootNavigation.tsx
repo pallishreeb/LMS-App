@@ -20,6 +20,7 @@ const RootNavigation = ({isLoggedIn}) => {
     };
 
     checkToken();
+    console.log('🚀 ~ RootNavigation ~ isLoggedIn:', isLoggedIn);
   }, [isLoggedIn]);
 
   if (isLoading) {
@@ -29,7 +30,7 @@ const RootNavigation = ({isLoggedIn}) => {
 
   return (
     <NavigationContainer>
-      {isLoggedIn || token ? <AfterLoginStack /> : <BeforeLoginStack />}
+      {isLoggedIn == true ? <AfterLoginStack /> : <BeforeLoginStack />}
     </NavigationContainer>
   );
 };

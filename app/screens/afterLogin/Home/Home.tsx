@@ -17,14 +17,13 @@ import {color} from '../../../constants/colors/colors';
 import {fp, hp, wp} from '../../../helpers/resDimension';
 import Header from '../../../components/header/Header';
 import {dummyRecommend, headerBg} from '../../../assets/images';
-import SearchTextInput from '../../../components/searchTextInput/SearchTextInput';
-import RecommendedList from '../../../components/recommededList/RecommendedList';
 import {typography} from '../../../assets/fonts/typography';
 import CourseCard from '../../../components/courseCard/CourseCard';
 import {apiClient} from '../../../helpers/apiClient';
 import {endpoints} from '../../../constants/colors/endpoints';
 import Snackbar from 'react-native-snackbar';
 import {FlatList} from 'react-native-gesture-handler';
+import LottieView from 'lottie-react-native';
 
 const Home = ({navigation}) => {
   const [searchText, setSearchText] = useState('');
@@ -179,6 +178,7 @@ const Home = ({navigation}) => {
     console.log('🚀 ~ renderBooks ~ item:', item);
     return (
       <Pressable
+        style={{elevation: 2}}
         onPress={() =>
           navigation.navigate('PdfBooks', {category_data: latestCategory})
         }>
@@ -186,7 +186,7 @@ const Home = ({navigation}) => {
           style={{
             backgroundColor: color.WHITE,
             height: hp(30.5),
-            width: wp(42),
+            width: wp(43),
             borderRadius: fp(1),
             marginRight: wp(3),
           }}>
@@ -196,7 +196,7 @@ const Home = ({navigation}) => {
             }}
             style={{
               height: hp(22),
-              width: wp(39.5),
+              width: wp(41.5),
               marginTop: hp(0.5),
               borderRadius: fp(1),
               alignSelf: 'center',
@@ -207,8 +207,8 @@ const Home = ({navigation}) => {
               type={'textRegular'}
               style={{
                 fontFamily: typography.Inter_Medium,
-                fontSize: fp(1.4),
-                color: '#333333',
+                fontSize: fp(1.6),
+                color: '#334344',
                 marginTop: hp(0.5),
               }}>
               {item.title}
@@ -230,8 +230,8 @@ const Home = ({navigation}) => {
               style={{
                 fontFamily: typography.Inter_SemiBold,
                 color: color.PRIMARY_BLUE,
-                marginTop: hp(0.5),
-                fontSize: fp(1.65),
+                // marginTop: hp(0.5),
+                fontSize: fp(1.75),
               }}>
               ৳ {item?.price}
             </CustomText>

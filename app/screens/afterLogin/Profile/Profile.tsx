@@ -18,7 +18,13 @@ import Pdf from 'react-native-pdf';
 import Header from '../../../components/header/Header';
 import {color} from '../../../constants/colors/colors';
 import {fp, hp, wp} from '../../../helpers/resDimension';
-import {CameraIcon, DummyProfImg, headerBg} from '../../../assets/images';
+import {
+  CameraIcon,
+  DummyProfImg,
+  User,
+  UserIcon,
+  headerBg,
+} from '../../../assets/images';
 import {ProfileInput} from '../../../components/input/ProfileInput';
 import {typography} from '../../../assets/fonts/typography';
 import ButtonComp from '../../../components/button/Button';
@@ -367,13 +373,15 @@ const Profile = ({navigation}) => {
             />
           ) : (
             <Image
-              source={EditProfile}
+              source={UserIcon}
               style={{
                 height: fp(14),
-                width: fp(14),
+                width: fp(10),
                 zIndex: -1,
-                borderRadius: fp(10),
+                // borderRadius: fp(10),
               }}
+              resizeMode="contain"
+              tintColor={color.PRIMARY_BLUE}
             />
           )}
         </View>

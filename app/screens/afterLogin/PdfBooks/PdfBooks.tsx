@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -8,6 +8,7 @@ import {
   StatusBar,
   FlatList,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import RNFetchBlob from 'rn-fetch-blob';
 import ButtonComp from '../../../components/button/Button';
@@ -24,21 +25,26 @@ import {Modal} from 'react-native';
 import CustomAlert from '../../../components/alerts/CustomAlert';
 import {PaymentAlertIllus} from '../../../assets/images';
 import date_one_year_from_today from '../../../utils/validDate/GetNextYear';
+import {checkFileStatus} from '../../../helpers/pdfDownload/downloadHelper';
+import {useDispatch, useSelector} from 'react-redux';
+import {setPdfStatus, setPdfStatuses} from '../../../redux/pdfStatusSlice';
 
 const PdfBooks = ({navigation, route}) => {
   const {category_data} = route.params;
-  const [statuses, setStatuses] = useState({});
+  const downloadTask = useRef(null);
+  const dispatch = useDispatch();
+  const pdfStatus = useSelector(state => state.pdfStatus); // Ensure 'PdfStatus' matches the slice name in your Redux store
+  console.log('🚀 ~ PdfBooks ~ pdfStatus:', pdfStatus);
+
+  // const [statuses, setStatuses] = useState({});
   // const [status, setStatus] = useState('download');
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchased, setIsPurchased] = useState(false);
   const [isApproved, setIsApproved] = useState('pending');
-  const [progress, setProgress] = useState(0);
-  const [filePath, setFilePath] = useState('');
-  const [res, setRes] = useState([]);
+  const [progress, setProgress] = useState({});
   const [incompletedBooks, setIncompletedBooks] = useState([]);
   const [completedBooks, setCompletedBooks] = useState([]);
-  const [firstTimeChecked, setFirstTimeChecked] = useState(false);
-
+  const [refreshing, setRefreshing] = useState(false);
   useEffect(() => {
     handleGetBooksByCategoryId();
     handleGetPaymentHistory();
@@ -68,9 +74,11 @@ const PdfBooks = ({navigation, route}) => {
         const isPurchased = response?.data?.some(
           item => item.category_id === category_data?.id,
         );
-
+        const obj = response?.data?.filter(
+          item => item.category_id === category_data?.id,
+        );
         setIsPurchased(isPurchased);
-        setIsApproved(response?.data[0]?.status);
+        setIsApproved(obj[0]?.status);
         console.log(
           '🚀 ~ handleGetPaymentHistory ~ response?.data?.status:',
           response?.data[0]?.status,
@@ -107,13 +115,15 @@ const PdfBooks = ({navigation, route}) => {
         const completedBooks = response.data.filter(
           book => book.status === 'Completed',
         );
-        for (const item of response?.data) {
+        for (const item of completedBooks) {
           const status = await checkFileStatus(item);
+          console.log('🚀 ~ handleGetBooksByCategoryId ~ status:', status);
           Object.assign(initialStatuses, status);
         }
-        setStatuses(initialStatuses);
+        dispatch(setPdfStatuses(initialStatuses));
+        // setStatuses(initialStatuses);
+
         setCompletedBooks(completedBooks);
-        setRes(response?.data);
       }
     } catch (error) {
       console.log('Error:', error.message);
@@ -126,54 +136,28 @@ const PdfBooks = ({navigation, route}) => {
       setIsLoading(false);
     }
   };
-
-  const checkFileStatus = async item => {
-    try {
-      const pdfUrl = item?.pdf_book;
-
-      if (!pdfUrl) {
-        console.error('PDF URL is not provided.');
-        return {[item?.id]: 'download'};
-      }
-
-      // Extract file name (portion after last /)
-      const fileNameWithExtension = pdfUrl.substring(
-        pdfUrl.lastIndexOf('/') + 1,
-      );
-      const cacheDir = RNFetchBlob.fs.dirs.CacheDir;
-      const filePath = `${cacheDir}/${fileNameWithExtension}`;
-      let newFilePath = filePath.replace(/%/g, '_');
-      const previousLink = await AsyncStorage.getItem(item?.title);
-      const fileExists = await RNFetchBlob.fs.exists(newFilePath);
-
-      let status;
-      if (fileExists) {
-        if (!previousLink || previousLink !== newFilePath) {
-          status = 'update';
+  const cancelDownload = () => {
+    if (downloadTask.current) {
+      downloadTask.current.cancel((err, taskId) => {
+        if (err) {
+          console.error('Download cancellation error:', err);
         } else {
-          status = 'read';
+          console.log(`Download ${taskId} cancelled`);
         }
-      } else {
-        if (previousLink && previousLink !== pdfUrl) {
-          status = 'update';
-        } else {
-          status = 'download';
-        }
-      }
-
-      return {[item.id]: status};
-    } catch (error) {
-      console.error('🚀 ~ checkFileStatus ~ Error:', error);
-      return {[item.id]: 'download'}; // Set status to 'download' in case of error
+      });
     }
   };
 
+  useEffect(() => {
+    return () => {
+      // Cleanup function to cancel the download if it's still in progress
+      cancelDownload();
+    };
+  }, []);
+
   const downloadPdf = async item => {
     console.log('download pdf');
-    setStatuses({
-      ...statuses,
-      [item.id]: 'downloading',
-    });
+    dispatch(setPdfStatus({id: item?.id, status: 'downloading'}));
     const pdfUrl = item?.pdf_book;
 
     const fileNameWithExtension = pdfUrl.substring(pdfUrl.lastIndexOf('/') + 1);
@@ -184,10 +168,9 @@ const PdfBooks = ({navigation, route}) => {
     console.log('🚀 ~ downloadPdf ~ newFilePath:', newFilePath);
 
     try {
-      // Download the PDF
       let downloadedSize = 0; // Initialize downloaded size to 0
 
-      const res = await RNFetchBlob.config({
+      downloadTask.current = RNFetchBlob.config({
         path: newFilePath,
       })
         .fetch('GET', pdfUrl)
@@ -195,9 +178,13 @@ const PdfBooks = ({navigation, route}) => {
           downloadedSize = received; // Update the downloaded size
           const percentage = Math.min((received / total) * 100); // Calculate progress percentage based on received size
           console.log('🚀 ~ .progress ~ percentage:', percentage);
-          setProgress(percentage); // Update progress state
+          // setProgress(percentage); // Update progress state
+          setProgress(prevProgress => ({
+            ...prevProgress,
+            [item.id]: percentage, // Update progress state by book ID
+          }));
         });
-
+      const res = await downloadTask.current;
       if (res.info().status === 200) {
         // Alert.alert('Download complete', `File saved to cache at: ${filePath}`);
         Snackbar.show({
@@ -205,12 +192,9 @@ const PdfBooks = ({navigation, route}) => {
           duration: 2000,
           backgroundColor: color.PRIMARY_BLUE,
         });
-        setFilePath(newFilePath);
         await AsyncStorage.setItem(item?.title, newFilePath);
-        setStatuses({
-          ...statuses,
-          [item.id]: 'read',
-        });
+
+        dispatch(setPdfStatus({id: item?.id, status: 'read'}));
       } else {
         Alert.alert('Download failed', `Status code: ${res.info().status}`);
         Snackbar.show({
@@ -218,19 +202,21 @@ const PdfBooks = ({navigation, route}) => {
           duration: 2000,
           backgroundColor: color.RED,
         });
-        setStatuses({
-          ...statuses,
-          [item.id]: 'download',
-        });
+
+        dispatch(setPdfStatus({id: item?.id, status: 'download'}));
       }
     } catch (error) {
       Alert.alert('Download error', error.message);
-      setStatuses({
-        ...statuses,
-        [item.id]: 'download', // Or handle other error states
-      });
+
+      dispatch(setPdfStatus({id: item?.id, status: 'download'}));
     }
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    handleGetBooksByCategoryId();
+    setRefreshing(false);
+  }, []);
   // useEffect(() => {
   //   cleanCache();
   // }, []);
@@ -259,61 +245,69 @@ const PdfBooks = ({navigation, route}) => {
 
   const handleButtonPress = item => {
     console.log('🚀 ~ handleButtonPress ~ item:', item);
-    const status = statuses[item.id];
-    console.log('🚀 ~ handleButtonPress ~ statuses:', statuses);
+    const status = pdfStatus[item?.id];
+    console.log('🚀 ~ handleButtonPress ~ statuses:', pdfStatus);
     console.log('🚀 ~ handleButtonPress ~ status:', status);
     if (status === 'download') {
       downloadPdf(item);
     } else if (status === 'read') {
       console.log('🚀 ~ handleButtonPress ~ item:', item);
+      cancelDownload();
       navigation.navigate('PdfViewer', {BookDetails: item});
     } else if (status === 'update') {
       downloadPdf(item);
     }
   };
   const [showPaymentAlert, setShowPaymentAlert] = useState(false);
-
-  function renderItem({item, index}) {
-    const status = statuses[item.id];
-    return (
-      <View style={styles.bookContainer}>
-        <Image source={{uri: item?.cover_pic}} style={styles.coverImage} />
-        <View>
-          <Text style={styles.title}>{item?.title}</Text>
-          <Text style={styles.description}>{item?.description}</Text>
-          {status === 'downloading' && (
-            <>
-              <View style={styles.progressBar}>
-                <View style={[styles.progress, {width: `${progress}%`}]} />
-              </View>
-              <Text style={{color: color.PRIMARY_BLUE, marginLeft: wp(3)}}>
-                {progress.toFixed(0)}%
-              </Text>
-            </>
-          )}
-          {status !== 'downloading' &&
-            isApproved == 'approved' &&
-            item?.status == 'Completed' &&
-            isPurchased && (
-              <View style={styles.buttonContainer}>
-                <ButtonComp
-                  title={
-                    status === 'download'
-                      ? 'Download'
-                      : status == 'read'
-                      ? 'Read Book'
-                      : 'Update'
-                  }
-                  padding={fp(1)}
-                  fontSize={fp(1.6)}
-                  onPress={() => handleButtonPress(item)}
-                />
+  const renderItem = useCallback(
+    ({item, index}) => {
+      const status = pdfStatus[item?.id];
+      return (
+        <View style={styles.bookContainer}>
+          <Image source={{uri: item?.cover_pic}} style={styles.coverImage} />
+          <View>
+            <Text style={styles.title}>{item?.title}</Text>
+            <Text style={styles.description}>{item?.description}</Text>
+            {status === 'downloading' && (
+              <View style={{marginBottom: hp(2)}}>
+                <View style={styles.progressBar}>
+                  <View
+                    style={[
+                      styles.progress,
+                      {width: `${progress[item?.id] || 0}%`},
+                    ]}
+                  />
+                </View>
+                <Text style={{color: color.PRIMARY_BLUE, marginLeft: wp(3)}}>
+                  {progress[item?.id]?.toFixed(0)}%
+                </Text>
               </View>
             )}
+            {status !== 'downloading' &&
+              isApproved == 'approved' &&
+              item?.status == 'Completed' &&
+              isPurchased && (
+                <View style={styles.buttonContainer}>
+                  <ButtonComp
+                    title={
+                      status === 'download'
+                        ? 'Download'
+                        : status == 'read'
+                        ? 'Read Book'
+                        : 'Update'
+                    }
+                    padding={fp(1)}
+                    fontSize={fp(1.6)}
+                    onPress={() => handleButtonPress(item)}
+                  />
+                </View>
+              )}
+          </View>
         </View>
-      </View>
-    );
-  }
+      );
+    },
+    [pdfStatus, progress, isApproved, isPurchased, downloadPdf],
+  );
   return (
     <View style={styles.container}>
       <StatusBar
@@ -332,6 +326,17 @@ const PdfBooks = ({navigation, route}) => {
           data={completedBooks}
           renderItem={renderItem}
           keyExtractor={item => item.id.toString()}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[
+                color.PRIMARY_BLUE,
+                color.PRIMARY_BLUE,
+                color.PRIMARY_BLUE,
+              ]} // Customize colors
+            />
+          }
         />
       ) : (
         // <View style={styles.loadingIndicator}>
@@ -447,6 +452,7 @@ const PdfBooks = ({navigation, route}) => {
           title="Secure Payment Process"
           subTitle="Secure payment gateway that keeps you safe from fraudsters and thieves"
           img={PaymentAlertIllus}
+          isImg={true}
           onPress={() => {
             setShowPaymentAlert(false);
             navigation.navigate('AnalogPaymentForm', {
@@ -478,7 +484,7 @@ const styles = StyleSheet.create({
   },
   bookContainer: {
     marginTop: hp(4),
-    height: hp(20),
+    maxHeight: hp(25),
     width: wp(90),
     borderColor: color.PRIMARY_BLUE,
     borderWidth: 1.5,
@@ -486,12 +492,13 @@ const styles = StyleSheet.create({
     elevation: 5,
     backgroundColor: color.WHITE,
     flexDirection: 'row',
+    // padding: fp(0.5),
   },
   coverImage: {
     height: fp(18),
     width: fp(16),
     marginLeft: wp(2),
-    marginTop: hp(1),
+    alignSelf: 'center',
     borderRadius: fp(1),
   },
   title: {
@@ -500,6 +507,7 @@ const styles = StyleSheet.create({
     fontFamily: typography.Inter_Bold,
     marginTop: hp(2.2),
     marginLeft: wp(3),
+    width: wp(50),
   },
   description: {
     color: color.DIM_BLACK,
@@ -518,8 +526,8 @@ const styles = StyleSheet.create({
     width: wp(30),
     height: hp(8),
     marginLeft: wp(2),
-    position: 'absolute',
-    bottom: 0,
+    // position: 'absolute',
+    // bottom: 0,
   },
   pdf: {
     flex: 1,
@@ -533,11 +541,13 @@ const styles = StyleSheet.create({
     height: hp(2),
     backgroundColor: '#ddd',
     borderRadius: 4,
+
     overflow: 'hidden',
   },
   progress: {
     height: '100%',
     backgroundColor: color.PRIMARY_BLUE,
+    // marginBottom: hp(3),
   },
   loadingIndicator: {
     ...StyleSheet.absoluteFillObject,

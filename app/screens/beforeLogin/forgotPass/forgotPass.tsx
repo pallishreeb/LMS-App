@@ -8,15 +8,49 @@ import {Input} from '../../../components/input/Input';
 import CustomText from '../../../components/text/CustomText';
 import {styles} from './styles';
 import {login_illustration} from '../../../assets/images/index';
+import {endpoints} from '../../../constants/colors/endpoints';
+import {apiClient} from '../../../helpers/apiClient';
+import Snackbar from 'react-native-snackbar';
 
-const ForgotPass = () => {
-  const handleEmail = () => {
-    console.log('email input active');
+const ForgotPass = ({navigation}) => {
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const handleEmail = val => {
+    setEmail(val);
   };
 
-  const handleResetPassword = () => {
-    console.log('Reset password pressed');
+  const handleResetPassword = async () => {
+    try {
+      setIsLoading(true);
+      console.log('🚀 ~ handleResetPassword ~ email:', email);
+      const response = await apiClient.post(endpoints.REQUEST_OTP, {
+        email: email,
+      });
+      if (response.status === 200) {
+        console.log(response?.data);
+        Snackbar.show({
+          text: response?.data?.message,
+          duration: 2000,
+          backgroundColor: color.PRIMARY_BLUE,
+        });
+        navigation.navigate('Otp', {
+          email: email,
+          previousRoute: 'forgetPass',
+        });
+        setIsLoading(false);
+      }
+    } catch (error) {
+      setIsLoading(false);
+      console.log('inside catch', error?.message);
+      Snackbar.show({
+        text: response?.data?.message,
+        duration: 2000,
+        backgroundColor: color.RED,
+      });
+      // }
+    }
   };
+
   return (
     <KeyboardAwareScrollView style={styles.mainContainer}>
       <StatusBar backgroundColor={color.WHITE} barStyle="light-content" />

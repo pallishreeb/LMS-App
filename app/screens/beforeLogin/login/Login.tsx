@@ -66,47 +66,9 @@ const Login = ({navigation}) => {
     }
     setIsLoading(false);
   };
-  // useEffect(() => {
-  //   const backAction = () => {
-  //     Alert.alert('Hold on!', 'Are you sure you want to exit the app?', [
-  //       {
-  //         text: 'Cancel',
-  //         onPress: () => null,
-  //         style: 'cancel',
-  //       },
-  //       {text: 'YES', onPress: () => BackHandler.exitApp()},
-  //     ]);
-  //     return true;
-  //   };
 
-  //   const backHandler = BackHandler.addEventListener(
-  //     'hardwareBackPress',
-  //     backAction,
-  //   );
-
-  //   return () => backHandler.remove();
-  // }, []);
   useEffect(() => {
     getRememberMeCredential();
-    // if (email) {
-    //   setIsLoading(false);
-    //   Alert.alert(
-    //     'Quick Reminder!',
-    //     `We noticed that you've saved your login credentials during your last visit. Would you like to log in faster with those saved credentials this time?`,
-    //     [
-    //       {
-    //         text: 'Yes, Use Saved Credentials',
-    //         onPress: () => getRememberMeCredential(),
-    //       },
-    //       {
-    //         text: `No, I'll Enter Manually`,
-    //         // onPress: () => console.log('pressed cancel'),
-    //       },
-    //     ],
-    //   );
-    // } else {
-    //   setIsLoading(false);
-    // }
   }, []);
 
   useEffect(() => {
@@ -279,6 +241,7 @@ const Login = ({navigation}) => {
     navigation.navigate('Otp', {
       phoneNo: response.data.data.mobile_number,
       email: response.data.data.email,
+      name: response.data.data.name,
       previousRoute: 'login',
     });
   }
@@ -296,7 +259,6 @@ const Login = ({navigation}) => {
       });
       console.log(response.status, 'response.status');
       if (response.status === 200) {
-        console.log(response?.data, 'react-native');
         setRes(response.data);
         await AsyncStorage.setItem('loginType', 'mannual');
         await AsyncStorage.setItem('token', response?.data?.token);
